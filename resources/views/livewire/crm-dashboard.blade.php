@@ -1,12 +1,15 @@
 <div class="p-6 space-y-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center">
+    <!-- Header Dashboard -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white">CRM Analytics Dashboard</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400">Ringkasan performa penjualan dan hubungan pelanggan</p>
         </div>
-        <div>
-            <a href="{{ route('deals.index', ['current_team' => auth()->user()->currentTeam->slug]) }}" wire:navigate class="px-4 py-2 bg-indigo-600 text-white font-medium text-xs rounded-lg hover:bg-indigo-700 transition">
+        <div class="flex items-center space-x-3">
+            <!-- KOMPONEN UNDANG ANGGOTA TIM -->
+            <livewire:teams.invite-member />
+
+            <a href="{{ route('deals.index', ['current_team' => auth()->user()->currentTeam->slug]) }}" wire:navigate class="px-3 py-1.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 font-medium text-xs rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition">
                 Kelola Deals &rarr;
             </a>
         </div>

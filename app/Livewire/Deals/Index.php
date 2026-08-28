@@ -130,6 +130,11 @@ class Index extends Component
 
     public function delete($id)
     {
+        if (!Auth::user()->isTeamAdmin()) {
+            session()->flash('error', 'Hanya Admin yang diizinkan menghapus deal.');
+            return;
+        }
+
         Deal::find($id)?->delete();
         session()->flash('message', 'Deal berhasil dihapus.');
     }

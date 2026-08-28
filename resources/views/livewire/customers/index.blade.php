@@ -55,11 +55,10 @@ new class extends Component
                         <td class="px-6 py-4 text-right space-x-2">
                             <a href="{{ route('customers.show', ['current_team' => auth()->user()->currentTeam->slug, 'id' => $customer->id]) }}" wire:navigate class="text-blue-600 hover:text-blue-900">Lihat</a>
                             <button wire:click="edit('{{ $customer->id }}')" class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                            <button wire:click="delete('{{ $customer->id }}')" wire:confirm="Yakin ingin menghapus data ini?" class="text-red-600 hover:text-red-900">Hapus</button>
-                        </td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <button wire:click="edit('{{ $customer->id }}')" class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                            <button wire:click="delete('{{ $customer->id }}')" wire:confirm="Yakin ingin menghapus data ini?" class="text-red-600 hover:text-red-900">Hapus</button>
+                            
+                            @if(auth()->user()->isTeamAdmin())
+                                <button wire:click="delete('{{ $customer->id }}')" wire:confirm="Yakin ingin menghapus data ini?" class="text-red-600 hover:text-red-900">Hapus</button>
+                            @endif
                         </td>
                     </tr>
                 @empty

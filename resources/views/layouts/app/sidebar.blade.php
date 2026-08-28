@@ -46,6 +46,15 @@
                         {{ __('Activities') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+                <flux:sidebar.group :heading="__('Manage')" class="grid">
+                    <flux:sidebar.item 
+                        icon="cog-6-tooth" 
+                        :href="route('team.settings', ['current_team' => auth()->user()->currentTeam->slug])" 
+                        :current="request()->routeIs('team.settings')" 
+                        wire:navigate>
+                        {{ __('Team Settings') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
             </flux:sidebar.nav>
 
             <flux:spacer />

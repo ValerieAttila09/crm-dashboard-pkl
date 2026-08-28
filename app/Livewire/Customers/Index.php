@@ -105,7 +105,12 @@ class Index extends Component
 
     public function delete($id)
     {
-        Customer::find($id)->delete();
+        if (!Auth::user()->isTeamAdmin()) {
+            session()->flash('error', 'Hanya Admin yang diizinkan menghapus pelanggan.');
+            return;
+        }
+
+        Customer::find($id)?->delete();
         session()->flash('message', 'Data pelanggan berhasil dihapus.');
     }
 }

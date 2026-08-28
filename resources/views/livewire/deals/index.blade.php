@@ -76,7 +76,10 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white text-sm leading-snug">{{ $deal->title }}</h4>
                                     <div class="flex items-center space-x-2 text-xs">
                                         <button wire:click="edit('{{ $deal->id }}')" class="text-gray-400 hover:text-indigo-600">Edit</button>
-                                        <button wire:click="delete('{{ $deal->id }}')" wire:confirm="Hapus deal ini?" class="text-gray-400 hover:text-red-600">&times;</button>
+                                        
+                                        @if(auth()->user()->isTeamAdmin())
+                                            <button wire:click="delete('{{ $deal->id }}')" wire:confirm="Hapus deal ini?" class="text-gray-400 hover:text-red-600">&times;</button>
+                                        @endif
                                     </div>
                                 </div>
 
