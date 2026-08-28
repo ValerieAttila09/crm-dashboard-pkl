@@ -7,6 +7,7 @@ use App\Livewire\Deals\Index as DealIndex;
 use App\Livewire\Customers\Show as CustomerShow;
 use App\Livewire\Interactions\Index as InteractionIndex;
 use App\Livewire\Teams\Settings as TeamSettings;
+use App\Livewire\Tasks\Index as TaskIndex;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -19,6 +20,7 @@ Route::prefix('{current_team}')
         Route::get('deals', DealIndex::class)->name('deals.index');
         Route::get('activities', InteractionIndex::class)->name('interactions.index');
         Route::get('team/settings', TeamSettings::class)->name('team.settings');
+        Route::get('tasks', TaskIndex::class)->name('tasks.index');
     });
 
 require __DIR__.'/settings.php';

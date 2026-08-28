@@ -45,6 +45,13 @@
                         wire:navigate>
                         {{ __('Activities') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item 
+                        icon="check-circle" 
+                        :href="route('tasks.index', ['current_team' => auth()->user()->currentTeam->slug])" 
+                        :current="request()->routeIs('tasks.index')" 
+                        wire:navigate>
+                        {{ __('Tasks') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
                 <flux:sidebar.group :heading="__('Manage')" class="grid">
                     <flux:sidebar.item 
