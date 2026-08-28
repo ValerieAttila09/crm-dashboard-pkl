@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\CrmDashboard;
 use App\Livewire\Customers\Index as CustomerIndex;
 use App\Livewire\Deals\Index as DealIndex;
+use App\Livewire\Customers\Show as CustomerShow;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -15,6 +16,7 @@ Route::prefix('{current_team}')
         Route::view('dashboard', 'dashboard')->name('dashboard');
         Route::get('crm', CrmDashboard::class)->name('crm.dashboard');
         Route::get('customers', CustomerIndex::class)->name('customers.index');
+        Route::get('customers/{id}', CustomerShow::class)->name('customers.show'); 
         Route::get('deals', DealIndex::class)->name('deals.index');
     });
 
