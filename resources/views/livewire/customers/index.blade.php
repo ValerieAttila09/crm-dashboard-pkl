@@ -23,8 +23,19 @@ new class extends Component
     @endif
 
     <!-- Search Bar -->
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <div class="flex items-center gap-2 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <input type="text" wire:model.live="search" placeholder="Cari nama, email, atau perusahaan..." class="w-full md:w-1/3 px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <div class="relative flex items-center gap-2" x-data="{ open: false }">
+            <button @click="open = !open" class="px-3 py-2.5 border border-neutral-300 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 text-xs font-semibold rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export Data
+            </button>
+
+            <div x-show="open" @click.away="open = false" class="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-gray-100 dark:border-zinc-700 py-1 z-50 text-xs" x-cloak>
+                <a href="{{ route('export.customers', ['current_team' => auth()->user()->currentTeam->slug, 'format' => 'csv']) }}" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-700">Export CSV / Excel (.csv)</a>
+                <a href="{{ route('export.customers', ['current_team' => auth()->user()->currentTeam->slug, 'format' => 'json']) }}" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-700">Export JSON (.json)</a>
+            </div>
+        </div>
     </div>
 
     <!-- Table -->

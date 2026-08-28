@@ -12,6 +12,16 @@
             <button wire:click="create()" class="px-4 py-2 bg-indigo-600 text-white font-medium text-sm rounded-lg hover:bg-indigo-700 transition">
                 + Tambah Deal
             </button>
+
+            <div class="relative flex items-center gap-2" x-data="{ open: false }">
+                <button @click="open = !open" class="px-3 py-2.5 border border-neutral-300 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 text-xs font-semibold rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition flex items-center gap-1.5">
+                    Export Deals
+                </button>
+                <div x-show="open" @click.away="open = false" class="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-gray-100 dark:border-zinc-700 py-1 z-50 text-xs" x-cloak>
+                    <a href="{{ route('export.deals', ['current_team' => auth()->user()->currentTeam->slug, 'format' => 'csv']) }}" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-700">Export CSV / Excel (.csv)</a>
+                    <a href="{{ route('export.deals', ['current_team' => auth()->user()->currentTeam->slug, 'format' => 'json']) }}" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-700">Export JSON (.json)</a>
+                </div>
+            </div>
         </div>
     </div>
 
