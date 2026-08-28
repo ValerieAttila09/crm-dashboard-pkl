@@ -89,9 +89,7 @@
                                         Rp {{ number_format($deal->amount, 0, ',', '.') }}
                                     </span>
                                     @if($deal->expected_close_date)
-                                        <span class="text-[10px] text-gray-400">
-                                            {{ $deal->expected_close_date->format('d M Y') }}
-                                        </span>
+                                        <span>{{ \Carbon\Carbon::parse($deal->expected_close_date)->format('d M Y') }}</span>
                                     @endif
                                 </div>
 

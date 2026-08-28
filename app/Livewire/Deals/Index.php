@@ -82,17 +82,26 @@ class Index extends Component
     {
         $this->validate();
 
-        Deal::updateOrCreate(
-            ['id' => $this->dealId],
-            [
+        if ($this->dealId) {
+            // Mode Edit / Update
+            $deal = Deal::findOrFail($this->dealId);
+            $deal->update([
                 'title' => $this->title,
                 'customer_id' => $this->customer_id,
                 'amount' => $this->amount,
                 'stage' => $this->stage,
                 'expected_close_date' => $this->expected_close_date ?: null,
-                'created_by' => null, // Sesuai penyesuaian FK Supabase
-            ]
-        );
+            ]);
+        } else {
+            // Mode Tambah Baru
+            Deal::create([
+                'title' => $this->title,
+                'customer_id' => $this->customer_id,
+                'amount' => $this->amount,
+                'stage' => $this->stage,
+                'expected_close_date' => $this->expected_close_date ?: null,
+            ]);
+        }
 
         session()->flash('message', $this->dealId ? 'Deal berhasil diperbarui.' : 'Deal baru berhasil dibuat.');
         $this->closeModal();
