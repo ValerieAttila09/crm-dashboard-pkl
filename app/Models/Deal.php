@@ -4,20 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Deal extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
-    protected $fillable = [
-        'title',
-        'amount',
-        'stage',
-        'expected_close_date',
-        'customer_id',
-        'assigned_to',
-    ];
+    protected $guarded = [];
+
+    // Otomatis ubah stage menjadi UPPERCASE saat menyimpan ke database PostgreSQL
+    protected function stage(): Attribute
+    {
+        return Attribute::make(
+            set: fn (string $value) => strtoupper($value),
+        );
+    }
 
     public function customer()
     {

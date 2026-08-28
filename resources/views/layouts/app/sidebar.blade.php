@@ -37,6 +37,14 @@
                         wire:navigate>
                         {{ __('Deals') }}
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item 
+                        icon="clock" 
+                        :href="route('interactions.index', ['current_team' => auth()->user()->currentTeam->slug])" 
+                        :current="request()->routeIs('interactions.index')" 
+                        wire:navigate>
+                        {{ __('Activities') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

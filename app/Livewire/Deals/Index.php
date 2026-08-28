@@ -11,6 +11,7 @@ class Index extends Component
 {
     public $isModalOpen = false;
     public $dealId = null;
+    public $search = '';
 
     // Form Fields
     public $title, $customer_id, $amount = 0, $stage = 'lead', $expected_close_date;
@@ -27,16 +28,29 @@ class Index extends Component
     {
         $stages = ['lead', 'proposal', 'negotiation', 'won', 'lost'];
         
-        $deals = Deal::with('customer')
-            ->latest()
-            ->get()
-            ->groupBy('stage');
+        $dealsQuery = Deal::with('customer')
+            ->when($this->search, function ($query) {
+                $query->where('title', 'like', '%' . $this->search . '%')
+                      ->orWhereHas('customer', function ($q) {
+                          $q->where('name', 'like', '%' . $this->search . '%');
+                      });
+            })
+            ->latest();
+
+        $dealsGrouped = $dealsQuery->get()->groupBy('stage');
+
+        // Hitung total nilai Rupiah per stage
+        $stageTotals = [];
+        foreach ($stages as $stg) {
+            $stageTotals[$stg] = isset($dealsGrouped[$stg]) ? $dealsGrouped[$stg]->sum('amount') : 0;
+        }
 
         $customers = Customer::orderBy('name')->get();
 
         return view('livewire.deals.index', [
             'stages' => $stages,
-            'deals' => $deals,
+            'deals' => $dealsGrouped,
+            'stageTotals' => $stageTotals,
             'customers' => $customers,
         ])->layout('layouts.app');
     }
@@ -44,11 +58,6 @@ class Index extends Component
     public function create()
     {
         $this->resetInputFields();
-        $this->isModalOpen = true;
-    }
-
-    public function openModal()
-    {
         $this->isModalOpen = true;
     }
 
@@ -81,7 +90,7 @@ class Index extends Component
                 'amount' => $this->amount,
                 'stage' => $this->stage,
                 'expected_close_date' => $this->expected_close_date ?: null,
-                'created_by' => Auth::id(),
+                'created_by' => null, // Sesuai penyesuaian FK Supabase
             ]
         );
 
@@ -99,7 +108,7 @@ class Index extends Component
         $this->stage = $deal->stage;
         $this->expected_close_date = $deal->expected_close_date ? $deal->expected_close_date->format('Y-m-d') : null;
 
-        $this->openModal();
+        $this->isModalOpen = true;
     }
 
     public function updateStage($dealId, $newStage)
@@ -112,7 +121,7 @@ class Index extends Component
 
     public function delete($id)
     {
-        Deal::find($id)->delete();
+        Deal::find($id)?->delete();
         session()->flash('message', 'Deal berhasil dihapus.');
     }
 }
