@@ -1,4 +1,5 @@
 <?php
+// app/Livewire/CrmDashboard.php
 
 namespace App\Livewire;
 
@@ -12,8 +13,11 @@ class CrmDashboard extends Component
 {
     public function render()
     {
-        // 1. Data Breakdown per Stage (Doughnut Chart)
-        $stageCounts = Deal::select('stage', DB::raw('count(*) as total'))
+        $currentTeam = Auth::user()->currentTeam;
+
+        // 1. Data Breakdown per Stage (Doughnut Chart) HANYA untuk Tim Aktif
+        $stageCounts = Deal::where('team_id', $currentTeam->id)
+            ->select('stage', DB::raw('count(*) as total'))
             ->groupBy('stage')
             ->pluck('total', 'stage')
             ->toArray();
@@ -27,12 +31,9 @@ class CrmDashboard extends Component
                 ?? 0;
         }
 
-        // 2. Data Trend Won Deals (Line Chart)
-        $monthsLabels = [];
-        $revenueData = [];
-
-        // Ambil data 6 bulan terakhir dari database
-        $monthlyRevenue = Deal::select(
+        // 2. Data Trend Won Deals (Line Chart) HANYA untuk Tim Aktif
+        $monthlyRevenue = Deal::where('team_id', $currentTeam->id)
+            ->select(
                 DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month_key"),
                 DB::raw("SUM(amount) as total_amount")
             )
@@ -42,7 +43,10 @@ class CrmDashboard extends Component
             ->pluck('total_amount', 'month_key')
             ->toArray();
 
-        // Generasi 6 Bulan Terakhir (termasuk bulan ini) agar grafik tidak kosong
+        $monthsLabels = [];
+        $revenueData = [];
+
+        // Generasi 6 Bulan Terakhir
         for ($i = 5; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             $key = $date->format('Y-m');

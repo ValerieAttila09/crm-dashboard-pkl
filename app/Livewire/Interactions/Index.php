@@ -1,4 +1,5 @@
 <?php
+// /home/valerie09/Documents/PKL/Laravel/crm-dashboard/app/Livewire/Interactions/Index.php
 
 namespace App\Livewire\Interactions;
 
@@ -69,19 +70,33 @@ class Index extends Component
             return;
         }
 
-        Interaction::find($id)?->delete();
+        $currentTeam = Auth::user()->currentTeam;
+        
+        // Pastikan hanya bisa menghapus interaction milik tim aktif
+        Interaction::whereHas('customer', function ($query) use ($currentTeam) {
+            $query->where('team_id', $currentTeam->id);
+        })->where('id', $id)->delete();
+
         session()->flash('message', 'Log aktivitas berhasil dihapus.');
     }
 
     public function render()
     {
-        $interactions = Interaction::with(['customer', 'user'])
+        $currentTeam = Auth::user()->currentTeam;
+
+        // Filter log aktivitas HANYA milik pelanggan di tim saat ini
+        $interactions = Interaction::whereHas('customer', function ($query) use ($currentTeam) {
+                $query->where('team_id', $currentTeam->id);
+            })
+            ->with(['customer', 'user'])
             ->when($this->search, function ($query) {
-                $query->where('notes', 'like', '%' . $this->search . '%')
-                      ->orWhereHas('customer', function ($q) {
-                          $q->where('name', 'like', '%' . $this->search . '%')
-                            ->orWhere('company', 'like', '%' . $this->search . '%');
+                $query->where(function ($q) {
+                    $q->where('notes', 'like', '%' . $this->search . '%')
+                      ->orWhereHas('customer', function ($cQuery) {
+                          $cQuery->where('name', 'like', '%' . $this->search . '%')
+                                 ->orWhere('company', 'like', '%' . $this->search . '%');
                       });
+                });
             })
             ->when($this->typeFilter, function ($query) {
                 $query->where('type', $this->typeFilter);
@@ -95,7 +110,8 @@ class Index extends Component
             ->latest()
             ->paginate(15);
 
-        $customers = Customer::orderBy('name')->get();
+        // Dropdown Customer HANYA milik tim saat ini
+        $customers = Customer::where('team_id', $currentTeam->id)->orderBy('name')->get();
 
         return view('livewire.interactions.index', [
             'interactions' => $interactions,

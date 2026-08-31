@@ -51,6 +51,12 @@
                         :current="request()->routeIs('tasks.index')" 
                         wire:navigate>
                         {{ __('Tasks') }}
+                    </flux:sidebar.item
+                        icon="calendar" 
+                        :href="route('calendar.index', ['current_team' => auth()->user()->currentTeam->slug])" 
+                        :current="request()->routeIs('calendar.index')" 
+                        wire:navigate>
+                        {{ __('Calenndar') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
                 <flux:sidebar.group :heading="__('Manage')" class="grid">

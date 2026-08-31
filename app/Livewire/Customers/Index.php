@@ -1,4 +1,5 @@
 <?php
+// app/Livewire/Customers/Index.php
 
 namespace App\Livewire\Customers;
 
@@ -31,15 +32,23 @@ class Index extends Component
 
     public function render()
     {
-        $customers = Customer::where('name', 'like', '%' . $this->search . '%')
-            ->orWhere('email', 'like', '%' . $this->search . '%')
-            ->orWhere('company', 'like', '%' . $this->search . '%')
+        $currentTeam = Auth::user()->currentTeam;
+
+        // Perbaikan struktur Query Grouping agar team_id terisolasi dengan benar
+        $customers = Customer::where('team_id', $currentTeam->id)
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('email', 'like', '%' . $this->search . '%')
+                    ->orWhere('company', 'like', '%' . $this->search . '%');
+                });
+            })
             ->latest()
             ->paginate(10);
 
         return view('livewire.customers.index', [
             'customers' => $customers
-        ])->layout('layouts.app'); // Memastikan menggunakan layout Flux utama
+        ])->layout('layouts.app');
     }
 
     public function create()
@@ -74,14 +83,17 @@ class Index extends Component
     {
         $this->validate();
 
+        $currentTeam = Auth::user()->currentTeam;
+
         Customer::updateOrCreate(
             ['id' => $this->customerId],
             [
+                'team_id' => $currentTeam->id,
                 'name' => $this->name,
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'company' => $this->company,
-                'status' => $this->status,
+                'status' => strtolower($this->status), // Memastikan format huruf kecil konsisten
                 'created_by' => Auth::id(),
             ]
         );
@@ -92,7 +104,9 @@ class Index extends Component
 
     public function edit($id)
     {
-        $customer = Customer::findOrFail($id);
+        $currentTeam = Auth::user()->currentTeam;
+        $customer = Customer::where('team_id', $currentTeam->id)->findOrFail($id);
+
         $this->customerId = $id;
         $this->name = $customer->name;
         $this->email = $customer->email;
@@ -110,7 +124,9 @@ class Index extends Component
             return;
         }
 
-        Customer::find($id)?->delete();
+        $currentTeam = Auth::user()->currentTeam;
+        Customer::where('team_id', $currentTeam->id)->where('id', $id)->delete();
+        
         session()->flash('message', 'Data pelanggan berhasil dihapus.');
     }
 }

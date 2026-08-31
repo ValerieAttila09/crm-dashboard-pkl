@@ -1,4 +1,5 @@
 <?php
+// /home/valerie09/Documents/PKL/Laravel/crm-dashboard/app/Livewire/Deals/Index.php
 
 namespace App\Livewire\Deals;
 
@@ -26,14 +27,19 @@ class Index extends Component
 
     public function render()
     {
+        $currentTeam = Auth::user()->currentTeam;
         $stages = ['lead', 'proposal', 'negotiation', 'won', 'lost'];
         
-        $dealsQuery = Deal::with('customer')
+        // Filter Deal HANYA untuk Tim Aktif
+        $dealsQuery = Deal::where('team_id', $currentTeam->id)
+            ->with('customer')
             ->when($this->search, function ($query) {
-                $query->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhereHas('customer', function ($q) {
-                          $q->where('name', 'like', '%' . $this->search . '%');
+                $query->where(function ($q) {
+                    $q->where('title', 'like', '%' . $this->search . '%')
+                      ->orWhereHas('customer', function ($cQuery) {
+                          $cQuery->where('name', 'like', '%' . $this->search . '%');
                       });
+                });
             })
             ->latest();
 
@@ -45,7 +51,8 @@ class Index extends Component
             $stageTotals[$stg] = isset($dealsGrouped[$stg]) ? $dealsGrouped[$stg]->sum('amount') : 0;
         }
 
-        $customers = Customer::orderBy('name')->get();
+        // Dropdown Customer HANYA milik Tim Aktif
+        $customers = Customer::where('team_id', $currentTeam->id)->orderBy('name')->get();
 
         return view('livewire.deals.index', [
             'stages' => $stages,
@@ -82,9 +89,11 @@ class Index extends Component
     {
         $this->validate();
 
+        $currentTeam = Auth::user()->currentTeam;
+
         if ($this->dealId) {
-            // Mode Edit / Update
-            $deal = Deal::findOrFail($this->dealId);
+            // Mode Edit / Update (Pastikan deal milik tim aktif)
+            $deal = Deal::where('team_id', $currentTeam->id)->findOrFail($this->dealId);
             $deal->update([
                 'title' => $this->title,
                 'customer_id' => $this->customer_id,
@@ -92,9 +101,10 @@ class Index extends Component
                 'stage' => $this->stage,
                 'expected_close_date' => $this->expected_close_date ?: null,
             ]);
-        } else {
-            // Mode Tambah Baru
+        } else {    
+            // Mode Tambah Baru (Sertakan team_id)
             Deal::create([
+                'team_id' => $currentTeam->id,
                 'title' => $this->title,
                 'customer_id' => $this->customer_id,
                 'amount' => $this->amount,
@@ -109,7 +119,9 @@ class Index extends Component
 
     public function edit($id)
     {
-        $deal = Deal::findOrFail($id);
+        $currentTeam = Auth::user()->currentTeam;
+        $deal = Deal::where('team_id', $currentTeam->id)->findOrFail($id);
+        
         $this->dealId = $id;
         $this->title = $deal->title;
         $this->customer_id = $deal->customer_id;
@@ -122,7 +134,9 @@ class Index extends Component
 
     public function updateStage($dealId, $newStage)
     {
-        $deal = Deal::find($dealId);
+        $currentTeam = Auth::user()->currentTeam;
+        $deal = Deal::where('team_id', $currentTeam->id)->find($dealId);
+        
         if ($deal) {
             $deal->update(['stage' => $newStage]);
         }
@@ -135,7 +149,9 @@ class Index extends Component
             return;
         }
 
-        Deal::find($id)?->delete();
+        $currentTeam = Auth::user()->currentTeam;
+        Deal::where('team_id', $currentTeam->id)->where('id', $id)->delete();
+        
         session()->flash('message', 'Deal berhasil dihapus.');
     }
 }
