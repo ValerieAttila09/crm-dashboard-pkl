@@ -85,6 +85,47 @@ new class extends Component
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Buat Kontrak Sewa Baru</h2>
 
                 <div class="space-y-3 text-xs">
+                    <!-- Field Pilih / Tambah Penyewa (Tenant) -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block font-semibold dark:text-gray-300">Pilih Penyewa (Tenant)</label>
+                            <button type="button" wire:click="toggleCreateTenant" class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                {{ $isCreatingTenant ? '← Pilih dari Daftar' : '+ Penyewa Baru' }}
+                            </button>
+                        </div>
+
+                        @if($isCreatingTenant)
+                            <!-- Form Input Tenant Cepat -->
+                            <div class="p-3 bg-indigo-50/50 dark:bg-zinc-900/60 rounded-lg border border-indigo-100 dark:border-zinc-700 space-y-2 mb-2">
+                                <div>
+                                    <input type="text" wire:model="new_tenant_name" placeholder="Nama Lengkap Penyewa" class="w-full p-2 border rounded text-xs dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">
+                                    @error('new_tenant_name') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <input type="email" wire:model="new_tenant_email" placeholder="Email (misal: user@mail.com)" class="w-full p-2 border rounded text-xs dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">
+                                        @error('new_tenant_email') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <input type="text" wire:model="new_tenant_phone" placeholder="No. Telp / WhatsApp" class="w-full p-2 border rounded text-xs dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">
+                                    </div>
+                                </div>
+                                <button type="button" wire:click="storeTenant" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded text-[11px]">
+                                    Simpan & Gunakan Penyewa
+                                </button>
+                            </div>
+                        @else
+                            <!-- Dropdown Pilih Tenant -->
+                            <select wire:model="customer_id" class="w-full p-2 border rounded dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">
+                                <option value="">-- Pilih Penyewa --</option>
+                                @foreach($tenants as $t)
+                                    <option value="{{ $t->id }}">{{ $t->name }} ({{ $t->email }})</option>
+                                @endforeach
+                            </select>
+                            @error('customer_id') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
+                        @endif
+                    </div>
+
                     <div>
                         <label class="block font-semibold mb-1 dark:text-gray-300">Pilih Kamar</label>
                         <select wire:model.live="room_id" class="w-full p-2 border rounded dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">

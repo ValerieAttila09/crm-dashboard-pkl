@@ -40,4 +40,15 @@ class Room extends Model
     {
         return $this->hasOne(Lease::class)->where('status', 'active');
     }
+
+    // Tambahkan metode ini di dalam class Room
+    public function scenes()
+    {
+        return $this->hasMany(RoomScene::class);
+    }
+
+    public function defaultScene()
+    {
+        return $this->hasOne(RoomScene::class)->where('is_default', true);
+    }
 }

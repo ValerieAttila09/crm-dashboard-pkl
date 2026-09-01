@@ -32,6 +32,46 @@ class Index extends Component
         'status' => 'required|in:active,ended,cancelled',
     ];
 
+    // Tambahkan properti ini di dalam class Index
+    public $isCreatingTenant = false;
+    public $new_tenant_name = '';
+    public $new_tenant_email = '';
+    public $new_tenant_phone = '';
+
+    public function toggleCreateTenant()
+    {
+        $this->isCreatingTenant = !$this->isCreatingTenant;
+        $this->new_tenant_name = '';
+        $this->new_tenant_email = '';
+        $this->new_tenant_phone = '';
+    }
+
+    public function storeTenant()
+    {
+        $this->validate([
+            'new_tenant_name' => 'required|string|max:255',
+            'new_tenant_email' => 'required|email|max:255',
+            'new_tenant_phone' => 'nullable|string|max:50',
+        ]);
+
+        $currentTeam = Auth::user()->currentTeam;
+
+        $tenant = Customer::create([
+            'team_id' => $currentTeam->id,
+            'name' => $this->new_tenant_name,
+            'email' => $this->new_tenant_email,
+            'phone' => $this->new_tenant_phone,
+            'status' => 'customer',
+            'created_by' => Auth::id(),
+        ]);
+
+        $this->customer_id = $tenant->id; // Otomatis pilih tenant yang baru dibuat
+        $this->isCreatingTenant = false;
+        $this->new_tenant_name = '';
+        $this->new_tenant_email = '';
+        $this->new_tenant_phone = '';
+    }
+
     public function create()
     {
         $this->resetInputFields();

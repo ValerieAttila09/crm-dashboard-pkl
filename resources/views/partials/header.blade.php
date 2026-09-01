@@ -40,7 +40,7 @@
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
         <div class="flex min-w-0 flex-col gap-1">
-            <nav aria-label="Breadcrumb" class="hidden items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 sm:flex">
+            <nav aria-label="Breadcrumb" class="hidden items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400 sm:flex">
                 @foreach ($breadcrumbs as $breadcrumb)
                     @if (! $loop->last)
                         <a href="{{ $breadcrumb['url'] ?? '#' }}" class="truncate transition hover:text-zinc-700 dark:hover:text-zinc-200">
@@ -54,10 +54,6 @@
                     @endif
                 @endforeach
             </nav>
-
-            <h2 class="hidden sm:block text-lg font-bold text-zinc-800 dark:text-zinc-100">
-                {{ $currentPageTitle }}
-            </h2>
         </div>
     </div>
 

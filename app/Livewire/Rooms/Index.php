@@ -4,32 +4,44 @@ namespace App\Livewire\Rooms;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads; // Import trait file upload Livewire
 use App\Models\Room;
 use App\Models\Property;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class Index extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads; // Gunakan WithFileUploads
 
     public $search = '';
     public $statusFilter = '';
     public $propertyFilter = '';
+    public $viewMode = 'grid';
 
     // Form Modal Fields
     public $isModalOpen = false;
     public $roomId = null;
-    public $property_id, $room_number, $type = 'Studio', $price_per_month = 0, $status = 'available', $panorama_360_url = '';
-    public $amenities = []; // Array pilihan fasilitas
+    public $property_id, $room_number, $type = 'Studio', $price_per_month = 0, $status = 'available';
+    public $panorama_image; // Menampung file upload baru
+    public $old_panorama_url; // Menampung URL gambar lama saat mode edit
 
-    protected $rules = [
-        'property_id' => 'required|exists:properties,id',
-        'room_number' => 'required|string|max:50',
-        'type' => 'required|string|max:50',
-        'price_per_month' => 'required|numeric|min:0',
-        'status' => 'required|in:available,occupied,maintenance',
-        'panorama_360_url' => 'nullable|url',
-    ];
+    // Inline Property
+    public $isCreatingProperty = false;
+    public $new_property_name = '';
+    public $new_property_address = '';
+
+    protected function rules()
+    {
+        return [
+            'property_id' => 'required|exists:properties,id',
+            'room_number' => 'required|string|max:50',
+            'type' => 'required|string|max:50',
+            'price_per_month' => 'required|numeric|min:0',
+            'status' => 'required|in:available,occupied,maintenance',
+            'panorama_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200', // Max 10MB (Foto 360 biasanya berukuran besar)
+        ];
+    }
 
     public function create()
     {
@@ -51,8 +63,9 @@ class Index extends Component
         $this->type = 'Studio';
         $this->price_per_month = 0;
         $this->status = 'available';
-        $this->panorama_360_url = '';
-        $this->amenities = [];
+        $this->panorama_image = null;
+        $this->old_panorama_url = null;
+        $this->isCreatingProperty = false;
         $this->resetValidation();
     }
 
@@ -60,6 +73,24 @@ class Index extends Component
     {
         $this->validate();
         $currentTeam = Auth::user()->currentTeam;
+
+        $imagePath = $this->old_panorama_url;
+
+        // Jika user mengunggah berkas gambar 360 baru
+        if ($this->panorama_image) {
+            // Hapus gambar lama di Supabase jika ada
+            if ($this->old_panorama_url) {
+                // Ambil nama file relative dari URL
+                $oldFileName = basename(parse_url($this->old_panorama_url, PHP_URL_PATH));
+                Storage::disk('supabase')->delete($oldFileName);
+            }
+
+            // Upload langsung ke Supabase Storage (Bucket: room-360)
+            $storedPath = $this->panorama_image->store('', 'supabase');
+            
+            // Ambil Public URL Supabase
+            $imagePath = Storage::disk('supabase')->url($storedPath);
+        }
 
         Room::updateOrCreate(
             ['id' => $this->roomId],
@@ -70,8 +101,7 @@ class Index extends Component
                 'type' => $this->type,
                 'price_per_month' => $this->price_per_month,
                 'status' => $this->status,
-                'panorama_360_url' => $this->panorama_360_url ?: null,
-                'amenities' => $this->amenities,
+                'panorama_360_url' => $imagePath,
             ]
         );
 
@@ -90,10 +120,39 @@ class Index extends Component
         $this->type = $room->type;
         $this->price_per_month = $room->price_per_month;
         $this->status = $room->status;
-        $this->panorama_360_url = $room->panorama_360_url;
-        $this->amenities = $room->amenities ?? [];
+        $this->old_panorama_url = $room->panorama_360_url;
 
         $this->isModalOpen = true;
+    }
+
+    public function toggleCreateProperty()
+    {
+        $this->isCreatingProperty = !$this->isCreatingProperty;
+    }
+
+    public function storeProperty()
+    {
+        $this->validate([
+            'new_property_name' => 'required|string|max:255',
+        ]);
+
+        $property = Property::create([
+            'team_id' => Auth::user()->currentTeam->id,
+            'name' => $this->new_property_name,
+            'address' => $this->new_property_address,
+        ]);
+
+        $this->property_id = $property->id;
+        $this->isCreatingProperty = false;
+        $this->new_property_name = '';
+        $this->new_property_address = '';
+    }
+
+    public function setViewMode($mode)
+    {
+        if (in_array($mode, ['grid', 'list'])) {
+            $this->viewMode = $mode;
+        }
     }
 
     public function render()

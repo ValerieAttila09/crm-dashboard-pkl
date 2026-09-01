@@ -21,8 +21,8 @@
                         wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-
-                    <flux:sidebar.item 
+                     
+                    {{-- <flux:sidebar.item 
                         icon="users" 
                         :href="route('customers.index', ['current_team' => auth()->user()->currentTeam->slug])" 
                         :current="request()->routeIs('customers.index')" 
@@ -52,15 +52,9 @@
                         :current="request()->routeIs('tasks.index')" 
                         wire:navigate>
                         {{ __('Tasks') }}
-                    </flux:sidebar.item>
+                    </flux:sidebar.item> --}}
 
-                    <flux:sidebar.item 
-                        icon="calendar" 
-                        :href="route('calendar.index', ['current_team' => auth()->user()->currentTeam->slug])" 
-                        :current="request()->routeIs('calendar.index')" 
-                        wire:navigate>
-                        {{ __('Calendar') }}
-                    </flux:sidebar.item>
+               
 
                     <flux:sidebar.item 
                         icon="home-modern" 
@@ -77,6 +71,22 @@
                         wire:navigate>
                         {{ __('Leases & Billing') }}
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item 
+                        icon="wrench-screwdriver" 
+                        :href="route('maintenance.index', ['current_team' => auth()->user()->currentTeam->slug])" 
+                        :current="request()->routeIs('maintenance.index')" 
+                        wire:navigate>
+                        {{ __('Maintenance') }}
+                    </flux:sidebar.item>
+                    </flux:sidebar.item>
+                        <flux:sidebar.item 
+                        icon="calendar" 
+                        :href="route('calendar.index', ['current_team' => auth()->user()->currentTeam->slug])" 
+                        :current="request()->routeIs('calendar.index')" 
+                        wire:navigate>
+                        {{ __('Calendar') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
                 <flux:sidebar.group :heading="__('Manage')" class="grid">
                     <flux:sidebar.item 
@@ -85,7 +95,6 @@
                         :current="request()->routeIs('team.settings')" 
                         wire:navigate>
                         {{ __('Team Settings') }}
-                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
