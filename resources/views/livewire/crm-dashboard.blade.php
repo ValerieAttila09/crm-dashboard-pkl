@@ -1,108 +1,140 @@
 <div class="p-6 space-y-6">
-    <!-- Header Dashboard -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">CRM Analytics Dashboard</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Ringkasan visual statistik penjualan dan pipeline</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Property & Living Management Dashboard</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Ringkasan okupansi unit kamar, pendapatan sewa, dan statistik properti.</p>
         </div>
-        <div class="flex items-center space-x-3">
-            <livewire:teams.invite-member />
-            <a href="{{ route('deals.index', ['current_team' => auth()->user()->currentTeam->slug]) }}" wire:navigate class="px-3 py-1.5 bg-indigo-600 text-white font-medium text-xs rounded-lg hover:bg-indigo-700 transition">
-                Kelola Pipeline &rarr;
+        <div class="flex gap-2">
+            <a href="{{ route('rooms.index', ['current_team' => auth()->user()->currentTeam->slug]) }}" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow" wire:navigate>
+                + Kelola Unit Kamar
+            </a>
+            <a href="{{ route('leases.index', ['current_team' => auth()->user()->currentTeam->slug]) }}" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow" wire:navigate>
+                + Kontrak Sewa
             </a>
         </div>
     </div>
 
-    <!-- Container Grid Chart.js -->
+    <!-- Metric Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-zinc-800 p-4 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Properti</p>
+            <h3 class="text-2xl font-black text-gray-900 dark:text-white mt-1">{{ $totalProperties }}</h3>
+            <span class="text-[10px] text-gray-400">Lokasi / Gedung terdaftar</span>
+        </div>
+
+        <div class="bg-white dark:bg-zinc-800 p-4 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Unit Kamar</p>
+            <h3 class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">{{ $totalRooms }}</h3>
+            <span class="text-[10px] text-gray-400">{{ $availableRooms }} Kamar Tersedia</span>
+        </div>
+
+        <div class="bg-white dark:bg-zinc-800 p-4 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Tingkat Okupansi</p>
+            <h3 class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{{ $occupancyRate }}%</h3>
+            <span class="text-[10px] text-gray-400">{{ $occupiedRooms }} Unit Kamar Terisi</span>
+        </div>
+
+        <div class="bg-white dark:bg-zinc-800 p-4 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Pendapatan Sewa Bulanan</p>
+            <h3 class="text-2xl font-black text-gray-900 dark:text-white mt-1">Rp {{ number_format($monthlyRevenueTarget, 0, ',', '.') }}</h3>
+            <span class="text-[10px] text-gray-400">Dari tagihan sewa yang lunas</span>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Line Chart: Trend Penjualan Won -->
-        <div class="lg:col-span-2 bg-white dark:bg-zinc-900 p-5 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-sm space-y-4">
-            <h3 class="font-bold text-sm text-gray-800 dark:text-white flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Trend Revenue Deals (Won)
-            </h3>
-            <div class="h-64 relative">
+        <!-- Line Chart Trend Pendapatan -->
+        <div class="lg:col-span-2 bg-white dark:bg-zinc-800 p-5 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Trend Pendapatan Sewa Properti</h3>
+            <div class="h-64">
                 <canvas id="revenueTrendChart"></canvas>
             </div>
         </div>
 
-        <!-- Doughnut Chart: Proporsi Stage Deals -->
-        <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-sm space-y-4">
-            <h3 class="font-bold text-sm text-gray-800 dark:text-white flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-purple-500"></span> Distribusi Stage Pipeline
-            </h3>
-            <div class="h-64 relative flex items-center justify-center">
-                <canvas id="stageDistributionChart"></canvas>
+        <!-- Doughnut Chart Okupansi -->
+        <div class="bg-white dark:bg-zinc-800 p-5 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Distribusi Status Kamar</h3>
+            <div class="h-64 relative">
+                <canvas id="roomStatusChart"></canvas>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Import Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-    let revenueChart = null;
-    let stageChart = null;
-
-    function renderCrmCharts() {
-        const ctxRevenue = document.getElementById('revenueTrendChart')?.getContext('2d');
-        const ctxStage = document.getElementById('stageDistributionChart')?.getContext('2d');
-
-        if (!ctxRevenue || !ctxStage) return;
-
-        // Hapus chart lama jika sudah ada
-        if (revenueChart) revenueChart.destroy();
-        if (stageChart) stageChart.destroy();
-
-        revenueChart = new Chart(ctxRevenue, {
-            type: 'line',
-            data: {
-                labels: @json($monthsLabels),
-                datasets: [{
-                    label: 'Total Revenue (Rp)',
-                    data: @json($revenueData),
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 3,
-                    pointRadius: 4,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(200, 200, 200, 0.1)' } },
-                    x: { grid: { display: false } }
-                }
-            }
+    <script>
+        document.addEventListener('livewire:navigated', function () {
+            initPropertyCharts();
         });
 
-        stageChart = new Chart(ctxStage, {
-            type: 'doughnut',
-            data: {
-                labels: @json($stageLabels),
-                datasets: [{
-                    data: @json($stageChartData),
-                    backgroundColor: ['#60a5fa', '#a78bfa', '#f59e0b', '#10b981', '#ef4444'],
-                    borderWidth: 0,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            initPropertyCharts();
+        } else {
+            document.addEventListener('DOMContentLoaded', initPropertyCharts);
+        }
+
+        function initPropertyCharts() {
+            const revenueEl = document.getElementById('revenueTrendChart');
+            const roomEl = document.getElementById('roomStatusChart');
+
+            if (!revenueEl || !roomEl) return;
+
+            let existingRevenueChart = Chart.getChart(revenueEl);
+            if (existingRevenueChart) existingRevenueChart.destroy();
+
+            let existingRoomChart = Chart.getChart(roomEl);
+            if (existingRoomChart) existingRoomChart.destroy();
+
+            // 1. Line Chart Trend Pendapatan
+            new Chart(revenueEl.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: @json($monthsLabels),
+                    datasets: [{
+                        label: 'Pendapatan (Rp)',
+                        data: @json($revenueData),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
                 },
-                cutout: '70%'
-            }
-        });
-    }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
 
-    // Eksekusi saat pertama kali dimuat & saat navigasi Livewire
-    document.addEventListener('DOMContentLoaded', renderCrmCharts);
-    document.addEventListener('livewire:navigated', renderCrmCharts);
-    setTimeout(renderCrmCharts, 100);
-</script>
+            // 2. Doughnut Chart Status Kamar
+            const rawRoomData = @json($stageChartData);
+            const isAllZero = rawRoomData.every(val => val === 0);
+
+            // Jika belum ada data kamar, berikan placeholder dummy 1 agar grafik lingkaran tetap dirender
+            const chartData = isAllZero ? [1, 0, 0] : rawRoomData;
+            const chartColors = isAllZero ? ['#e5e7eb', '#e5e7eb', '#e5e7eb'] : ['#10b981', '#6366f1', '#f59e0b'];
+
+            new Chart(roomEl.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: isAllZero ? ['Belum ada data kamar'] : @json($stageLabels),
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: chartColors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</div>

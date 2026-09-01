@@ -10,6 +10,8 @@ use App\Livewire\Teams\Settings as TeamSettings;
 use App\Livewire\Tasks\Index as TaskIndex;
 use App\Http\Controllers\ExportController;
 use App\Livewire\Calendar\Index as CalendarIndex;
+use App\Livewire\Rooms\Index as RoomIndex;
+use App\Livewire\Leases\Index as LeaseIndex;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -24,6 +26,8 @@ Route::prefix('{current_team}')
         Route::get('team/settings', TeamSettings::class)->name('team.settings');
         Route::get('tasks', TaskIndex::class)->name('tasks.index');
         Route::get('calendar', CalendarIndex::class)->name('calendar.index');
+        Route::get('rooms', RoomIndex::class)->name('rooms.index');
+        Route::get('leases', LeaseIndex::class)->name('leases.index');
 
         // ROUTE EXPORT DATA
         Route::get('export/customers', [ExportController::class, 'exportCustomers'])->name('export.customers');

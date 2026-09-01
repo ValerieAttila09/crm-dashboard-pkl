@@ -71,13 +71,10 @@ new class extends Component
                 <!-- Event Badges -->
                 <div class="space-y-1 overflow-y-auto max-h-[85px] text-[11px]">
                     @foreach ($dayEvents as $event)
-                        @if ($event['type'] === 'task')
-                            <div class="px-1.5 py-0.5 rounded truncate border {{ $event['is_completed'] ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300' }}">
-                                📌 {{ $event['title'] }}
-                            </div>
-                        @elseif ($event['type'] === 'deal')
-                            <div class="px-1.5 py-0.5 rounded truncate bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 font-semibold">
-                                💰 {{ $event['title'] }}
+                        @if ($event['type'] === 'lease_due')
+                            <div class="px-1.5 py-0.5 rounded truncate border text-[10px] font-semibold 
+                                {{ $event['payment_status'] === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300' : ($event['payment_status'] === 'unpaid' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300') }}">
+                                🏠 {{ $event['title'] }}
                             </div>
                         @endif
                     @endforeach

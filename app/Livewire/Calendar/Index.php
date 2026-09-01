@@ -3,8 +3,7 @@
 namespace App\Livewire\Calendar;
 
 use Livewire\Component;
-use App\Models\Task;
-use App\Models\Deal;
+use App\Models\Lease;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -48,39 +47,26 @@ class Index extends Component
         // Menentukan hari pertama dalam seminggu (0 = Minggu, 1 = Senin, dst)
         $startingDayOfWeek = $firstDayOfMonth->dayOfWeek;
 
-        // Ambil Tasks milik tim aktif pada bulan & tahun ini
-        $tasks = Task::whereHas('deal', function ($query) use ($currentTeam) {
-                $query->where('team_id', $currentTeam->id);
-            })
-            ->whereMonth('due_date', $this->currentMonth)
-            ->whereYear('due_date', $this->currentYear)
+        // Ambil data Lease milik tim aktif yang berakhir/jatuh tempo pada bulan & tahun ini
+        $leases = Lease::where('team_id', $currentTeam->id)
+            ->with(['room', 'tenant'])
+            ->whereMonth('end_date', $this->currentMonth)
+            ->whereYear('end_date', $this->currentYear)
             ->get();
 
-        // Ambil Deals milik tim aktif yang punya expected_close_date pada bulan & tahun ini
-        $deals = Deal::where('team_id', $currentTeam->id)
-            ->whereNotNull('expected_close_date')
-            ->whereMonth('expected_close_date', $this->currentMonth)
-            ->whereYear('expected_close_date', $this->currentYear)
-            ->get();
-
-        // Kelompokkan Event berdasarkan tanggal (Format Y-m-d)
+        // Kelompokkan Event berdasarkan tanggal jatuh tempo (Format Y-m-d)
         $eventsByDate = [];
 
-        foreach ($tasks as $task) {
-            $dateKey = Carbon::parse($task->due_date)->format('Y-m-d');
-            $eventsByDate[$dateKey][] = [
-                'type' => 'task',
-                'title' => $task->title,
-                'is_completed' => $task->is_completed,
-            ];
-        }
+        foreach ($leases as $lease) {
+            $dateKey = Carbon::parse($lease->end_date)->format('Y-m-d');
+            $tenantName = $lease->tenant->name ?? 'Penyewa';
+            $roomNumber = $lease->room->room_number ?? '-';
 
-        foreach ($deals as $deal) {
-            $dateKey = Carbon::parse($deal->expected_close_date)->format('Y-m-d');
             $eventsByDate[$dateKey][] = [
-                'type' => 'deal',
-                'title' => 'Closing: ' . $deal->title,
-                'amount' => $deal->amount,
+                'type' => 'lease_due',
+                'title' => "Jatuh Tempo: Kamar {$roomNumber} ({$tenantName})",
+                'payment_status' => $lease->payment_status,
+                'amount' => $lease->monthly_rent,
             ];
         }
 

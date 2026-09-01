@@ -30,4 +30,19 @@ class DashboardTest extends TestCase
 
         $response->assertOk();
     }
+
+    public function test_dashboard_displays_breadcrumb_navigation(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->get(route('dashboard', ['current_team' => $user->currentTeam->slug]));
+
+        $response
+            ->assertOk()
+            ->assertSee('aria-label="Breadcrumb"', false)
+            ->assertSee('Home', false)
+            ->assertSee('Dashboard', false);
+    }
 }

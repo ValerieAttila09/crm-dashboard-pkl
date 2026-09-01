@@ -61,6 +61,22 @@
                         wire:navigate>
                         {{ __('Calendar') }}
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item 
+                        icon="home-modern" 
+                        :href="route('rooms.index', ['current_team' => auth()->user()->currentTeam->slug])" 
+                        :current="request()->routeIs('rooms.index')" 
+                        wire:navigate>
+                        {{ __('Rooms & 360°') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item 
+                        icon="document-text" 
+                        :href="route('leases.index', ['current_team' => auth()->user()->currentTeam->slug])" 
+                        :current="request()->routeIs('leases.index')" 
+                        wire:navigate>
+                        {{ __('Leases & Billing') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
                 <flux:sidebar.group :heading="__('Manage')" class="grid">
                     <flux:sidebar.item 

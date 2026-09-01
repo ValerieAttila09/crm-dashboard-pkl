@@ -1,10 +1,11 @@
 <?php
-// app/Livewire/CrmDashboard.php
 
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\Deal;
+use App\Models\Room;
+use App\Models\Property;
+use App\Models\Lease;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -15,29 +16,40 @@ class CrmDashboard extends Component
     {
         $currentTeam = Auth::user()->currentTeam;
 
-        // 1. Data Breakdown per Stage (Doughnut Chart) HANYA untuk Tim Aktif
-        $stageCounts = Deal::where('team_id', $currentTeam->id)
-            ->select('stage', DB::raw('count(*) as total'))
-            ->groupBy('stage')
-            ->pluck('total', 'stage')
+        // 1. Data Ringkasan Stat (Metric Cards)
+        $totalProperties = Property::where('team_id', $currentTeam->id)->count();
+        $totalRooms = Room::where('team_id', $currentTeam->id)->count();
+        $occupiedRooms = Room::where('team_id', $currentTeam->id)->where('status', 'occupied')->count();
+        $availableRooms = Room::where('team_id', $currentTeam->id)->where('status', 'available')->count();
+        
+        $occupancyRate = $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 1) : 0;
+
+        $monthlyRevenueTarget = Lease::where('team_id', $currentTeam->id)
+            ->where('status', 'active')
+            ->where('payment_status', 'paid')
+            ->sum('monthly_rent');
+
+        // 2. Data Breakdown Status Kamar (Doughnut Chart)
+        $roomCounts = Room::where('team_id', $currentTeam->id)
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status')
             ->toArray();
 
-        $stages = ['Lead', 'Proposal', 'Negotiation', 'Won', 'Lost'];
-        $stageChartData = [];
-        foreach ($stages as $stage) {
-            $stageChartData[] = $stageCounts[$stage] 
-                ?? $stageCounts[strtolower($stage)] 
-                ?? $stageCounts[strtoupper($stage)] 
-                ?? 0;
-        }
+        $stageLabels = ['Tersedia (Available)', 'Terisi (Occupied)', 'Perawatan (Maintenance)'];
+        $stageChartData = [
+            $roomCounts['available'] ?? 0,
+            $roomCounts['occupied'] ?? 0,
+            $roomCounts['maintenance'] ?? 0,
+        ];
 
-        // 2. Data Trend Won Deals (Line Chart) HANYA untuk Tim Aktif
-        $monthlyRevenue = Deal::where('team_id', $currentTeam->id)
+        // 3. Data Trend Pendapatan Sewa 6 Bulan Terakhir (Line Chart)
+        $monthlyRevenue = Lease::where('team_id', $currentTeam->id)
+            ->where('payment_status', 'paid')
             ->select(
                 DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month_key"),
-                DB::raw("SUM(amount) as total_amount")
+                DB::raw("SUM(monthly_rent) as total_amount")
             )
-            ->whereIn(DB::raw('LOWER(stage)'), ['won'])
             ->groupBy('month_key')
             ->orderBy('month_key', 'asc')
             ->pluck('total_amount', 'month_key')
@@ -46,7 +58,6 @@ class CrmDashboard extends Component
         $monthsLabels = [];
         $revenueData = [];
 
-        // Generasi 6 Bulan Terakhir
         for ($i = 5; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             $key = $date->format('Y-m');
@@ -56,7 +67,13 @@ class CrmDashboard extends Component
         }
 
         return view('livewire.crm-dashboard', [
-            'stageLabels' => $stages,
+            'totalProperties' => $totalProperties,
+            'totalRooms' => $totalRooms,
+            'occupiedRooms' => $occupiedRooms,
+            'availableRooms' => $availableRooms,
+            'occupancyRate' => $occupancyRate,
+            'monthlyRevenueTarget' => $monthlyRevenueTarget,
+            'stageLabels' => $stageLabels,
             'stageChartData' => $stageChartData,
             'monthsLabels' => $monthsLabels,
             'revenueData' => $revenueData,

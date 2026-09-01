@@ -6,27 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class Customer extends Model
+class Property extends Model
 {
     use HasFactory, HasUuids;
 
     protected $fillable = [
         'team_id',
         'name',
-        'email',
-        'phone',
-        'company',
-        'status',
-        'created_by',
+        'address',
+        'description',
     ];
 
-    public function deals()
+    public function rooms()
     {
-        return $this->hasMany(Deal::class);
+        return $this->hasMany(Room::class);
     }
 
-    public function interactions()
+    public function team()
     {
-        return $this->hasMany(Interaction::class);
+        return $this->belongsTo(Team::class);
     }
 }
