@@ -12,19 +12,26 @@ use Carbon\Carbon;
 
 class CrmDashboard extends Component
 {
+    public int $totalProperties = 0;
+    public int $totalRooms = 0;
+    public int $occupiedRooms = 0;
+    public int $availableRooms = 0;
+    public float $occupancyRate = 0;
+    public float $monthlyRevenueTarget = 0;
+
     public function render()
     {
         $currentTeam = Auth::user()->currentTeam;
 
         // 1. Data Ringkasan Stat (Metric Cards)
-        $totalProperties = Property::where('team_id', $currentTeam->id)->count();
-        $totalRooms = Room::where('team_id', $currentTeam->id)->count();
-        $occupiedRooms = Room::where('team_id', $currentTeam->id)->where('status', 'occupied')->count();
-        $availableRooms = Room::where('team_id', $currentTeam->id)->where('status', 'available')->count();
-        
-        $occupancyRate = $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 1) : 0;
+        $this->totalProperties = Property::where('team_id', $currentTeam->id)->count();
+        $this->totalRooms = Room::where('team_id', $currentTeam->id)->count();
+        $this->occupiedRooms = Room::where('team_id', $currentTeam->id)->where('status', 'occupied')->count();
+        $this->availableRooms = Room::where('team_id', $currentTeam->id)->where('status', 'available')->count();
 
-        $monthlyRevenueTarget = Lease::where('team_id', $currentTeam->id)
+        $this->occupancyRate = $this->totalRooms > 0 ? round(($this->occupiedRooms / $this->totalRooms) * 100, 1) : 0;
+
+        $this->monthlyRevenueTarget = (float) Lease::where('team_id', $currentTeam->id)
             ->where('status', 'active')
             ->where('payment_status', 'paid')
             ->sum('monthly_rent');
@@ -67,12 +74,12 @@ class CrmDashboard extends Component
         }
 
         return view('livewire.crm-dashboard', [
-            'totalProperties' => $totalProperties,
-            'totalRooms' => $totalRooms,
-            'occupiedRooms' => $occupiedRooms,
-            'availableRooms' => $availableRooms,
-            'occupancyRate' => $occupancyRate,
-            'monthlyRevenueTarget' => $monthlyRevenueTarget,
+            'totalProperties' => $this->totalProperties,
+            'totalRooms' => $this->totalRooms,
+            'occupiedRooms' => $this->occupiedRooms,
+            'availableRooms' => $this->availableRooms,
+            'occupancyRate' => $this->occupancyRate,
+            'monthlyRevenueTarget' => $this->monthlyRevenueTarget,
             'stageLabels' => $stageLabels,
             'stageChartData' => $stageChartData,
             'monthsLabels' => $monthsLabels,
