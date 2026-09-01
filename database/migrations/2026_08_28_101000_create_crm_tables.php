@@ -179,6 +179,7 @@ return new class extends Migration
         if (!Schema::hasTable('deals')) {
             Schema::create('deals', function (Blueprint $table) {
                 $table->uuid('id')->primary();
+                $table->foreignId('team_id')->nullable()->constrained('teams')->cascadeOnDelete(); // <-- Tambahkan baris ini
                 $table->string('title');
                 $table->decimal('amount', 15, 2)->default(0.00);
                 $table->string('stage')->default('qualification');
