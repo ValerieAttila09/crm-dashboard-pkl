@@ -91,7 +91,7 @@
                     <div class="p-4 border-t border-gray-100 dark:border-zinc-700/50 flex justify-end gap-2 bg-gray-50 dark:bg-zinc-900/50">
                         <a href="{{ route('rooms.show', ['current_team' => auth()->user()->currentTeam->slug, 'id' => $room->id]) }}" 
                             class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-xs font-semibold rounded text-white shadow" 
-                            wire:navigate>
+                            >
                             🌐 Virtual Tour
                         </a>
                         <button wire:click="edit('{{ $room->id }}')" class="px-3 py-1.5 bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 text-xs font-semibold rounded text-gray-800 dark:text-gray-200">
@@ -154,7 +154,7 @@
                             <td class="p-3 flex items-center gap-2">
                                 <a href="{{ route('rooms.show', ['current_team' => auth()->user()->currentTeam->slug, 'id' => $room->id]) }}" 
                                     class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-xs font-semibold rounded text-white shadow" 
-                                    wire:navigate>
+                                    >
                                     🌐 Virtual Tour
                                 </a>
                                 <button wire:click="edit('{{ $room->id }}')" class="px-2.5 py-1 bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 text-xs font-semibold rounded text-gray-800 dark:text-gray-200">

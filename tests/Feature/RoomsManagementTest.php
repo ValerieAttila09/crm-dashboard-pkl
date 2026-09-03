@@ -8,7 +8,6 @@ use App\Livewire\Rooms\Show as RoomShow;
 use App\Models\Customer;
 use App\Models\Property;
 use App\Models\Room;
-use App\Models\RoomHotspot;
 use App\Models\RoomScene;
 use App\Models\Team;
 use App\Models\User;
@@ -145,7 +144,7 @@ class RoomsManagementTest extends TestCase
         ]);
     }
 
-    public function test_switching_scene_dispatches_the_selected_panorama_and_hotspots(): void
+    public function test_switching_scene_selects_the_requested_room(): void
     {
         $team = Team::factory()->create();
         $user = $this->makeAuthenticatedUserForTeam($team);
@@ -169,64 +168,12 @@ class RoomsManagementTest extends TestCase
             'title' => 'Dapur',
             'image_url' => 'https://example.test/kitchen.jpg',
         ]);
-        RoomHotspot::create([
-            'room_scene_id' => $secondScene->id,
-            'target_scene_id' => $firstScene->id,
-            'title' => 'Kembali ke Ruang Tamu',
-            'pitch' => 10,
-            'yaw' => -20,
-        ]);
-
         Livewire::actingAs($user)
             ->test(RoomShow::class, ['id' => $room->id])
+            ->assertSee('Ruang Tamu')
+            ->assertSee('Dapur')
             ->call('selectScene', $secondScene->id)
-            ->assertDispatched('load-scene', function ($eventName, $params) use ($secondScene, $firstScene) {
-                return $eventName === 'load-scene'
-                    && $params['scene']['imageUrl'] === $secondScene->image_url
-                    && $params['scene']['hotspots'][0]['targetSceneId'] === $firstScene->id;
-            });
-    }
-
-    public function test_storing_hotspot_persists_it_for_the_active_scene(): void
-    {
-        $team = Team::factory()->create();
-        $user = $this->makeAuthenticatedUserForTeam($team);
-        $property = Property::create(['team_id' => $team->id, 'name' => 'Oak Terrace']);
-        $room = Room::create([
-            'team_id' => $team->id,
-            'property_id' => $property->id,
-            'room_number' => 'D-102',
-            'type' => 'Studio',
-            'price_per_month' => 2500000,
-            'status' => 'available',
-        ]);
-        $sourceScene = RoomScene::create([
-            'room_id' => $room->id,
-            'title' => 'Ruang Tamu',
-            'image_url' => 'https://example.test/living-room.jpg',
-            'is_default' => true,
-        ]);
-        $targetScene = RoomScene::create([
-            'room_id' => $room->id,
-            'title' => 'Dapur',
-            'image_url' => 'https://example.test/kitchen.jpg',
-        ]);
-
-        Livewire::actingAs($user)
-            ->test(RoomShow::class, ['id' => $room->id])
-            ->set('clickedPitch', 10.25)
-            ->set('clickedYaw', -20.5)
-            ->set('activeSceneId', $sourceScene->id)
-            ->set('target_scene_id', $targetScene->id)
-            ->set('hotspot_title', 'Masuk ke Dapur')
-            ->call('storeHotspot')
-            ->assertHasNoErrors()
-            ->assertDispatched('load-scene');
-
-        $this->assertDatabaseHas('room_hotspots', [
-            'room_scene_id' => $sourceScene->id,
-            'target_scene_id' => $targetScene->id,
-            'title' => 'Masuk ke Dapur',
-        ]);
+            ->assertSet('activeSceneId', $secondScene->id)
+            ->assertSee('Dapur');
     }
 }

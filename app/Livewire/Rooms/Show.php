@@ -6,10 +6,8 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Room;
 use App\Models\RoomScene;
-use App\Models\RoomHotspot;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 
 class Show extends Component
 {
@@ -24,13 +22,6 @@ class Show extends Component
     public $is_default = false;
     public $isSceneModalOpen = false;
 
-    // State Tambah Hotspot Via Klik 360
-    public $isHotspotModalOpen = false;
-    public $clickedPitch = 0;
-    public $clickedYaw = 0;
-    public $target_scene_id = '';
-    public $hotspot_title = '';
-
     protected function rules()
     {
         return [
@@ -43,7 +34,7 @@ class Show extends Component
     {
         $currentTeam = Auth::user()->currentTeam;
         $this->room = Room::where('team_id', $currentTeam->id)
-            ->with(['property', 'scenes.hotspots.targetScene'])
+            ->with(['property', 'scenes'])
             ->findOrFail($id);
 
         if ($this->room->scenes->isEmpty() && $this->room->panorama_360_url) {
@@ -53,7 +44,7 @@ class Show extends Component
                 'image_url' => $this->room->panorama_360_url,
                 'is_default' => true,
             ]);
-            $this->room->load('scenes.hotspots.targetScene');
+            $this->room->load('scenes');
         }
 
         $defaultScene = $this->room->scenes->where('is_default', true)->first() ?? $this->room->scenes->first();
@@ -62,23 +53,12 @@ class Show extends Component
 
     public function selectScene($sceneId)
     {
-        $this->activeSceneId = $sceneId;
-        $this->dispatch('load-scene', scene: $this->viewerSceneData($sceneId));
-    }
-
-    private function viewerSceneData($sceneId): array
-    {
         $scene = $this->room->scenes->firstWhere('id', $sceneId);
+        if (!$scene) {
+            return;
+        }
 
-        return [
-            'imageUrl' => $scene?->image_url,
-            'hotspots' => $scene?->hotspots->map(fn (RoomHotspot $hotspot) => [
-                'pitch' => (float) $hotspot->pitch,
-                'yaw' => (float) $hotspot->yaw,
-                'title' => $hotspot->title,
-                'targetSceneId' => (string) $hotspot->target_scene_id,
-            ])->values()->all() ?? [],
-        ];
+        $this->activeSceneId = $sceneId;
     }
 
     public function openSceneModal()
@@ -116,55 +96,15 @@ class Show extends Component
 
         $this->isSceneModalOpen = false;
         $this->activeSceneId = $scene->id;
-        $this->room->load('scenes.hotspots.targetScene');
-        $this->dispatch('load-scene', scene: $this->viewerSceneData($scene->id));
+        $this->room->load('scenes');
 
         session()->flash('message', 'Ruangan 360° berhasil diunggah.');
     }
 
-    // Dipanggil via Event JavaScript saat user mengklik viewer 360°
-    public function captureHotspotCoords($pitch, $yaw)
-    {
-        $this->clickedPitch = round($pitch, 2);
-        $this->clickedYaw = round($yaw, 2);
-        $this->reset(['target_scene_id', 'hotspot_title']);
-        $this->isHotspotModalOpen = true;
-    }
-
-    public function openHotspotEditor()
-    {
-        $this->isHotspotModalOpen = true;
-        $this->dispatch('open-hotspot-editor', scene: $this->viewerSceneData($this->activeSceneId));
-    }
-
-    public function storeHotspot()
-    {
-        $this->validate([
-            'target_scene_id' => [
-                'required',
-                Rule::exists('room_scenes', 'id')->where(fn ($query) => $query->where('room_id', $this->room->id)),
-            ],
-            'hotspot_title' => 'required|string|max:255',
-        ]);
-
-        RoomHotspot::create([
-            'room_scene_id' => $this->activeSceneId,
-            'target_scene_id' => $this->target_scene_id,
-            'title' => $this->hotspot_title,
-            'pitch' => $this->clickedPitch,
-            'yaw' => $this->clickedYaw,
-        ]);
-
-        $this->isHotspotModalOpen = false;
-        $this->room->load('scenes.hotspots.targetScene');
-        $this->dispatch('load-scene', scene: $this->viewerSceneData($this->activeSceneId));
-
-        session()->flash('message', 'Hotspot navigasi berhasil ditambahkan.');
-    }
 
     public function render()
     {
-        $activeScene = RoomScene::with('hotspots.targetScene')->find($this->activeSceneId);
+        $activeScene = $this->room->scenes->firstWhere('id', $this->activeSceneId);
 
         return view('livewire.rooms.show', [
             'activeScene' => $activeScene,
