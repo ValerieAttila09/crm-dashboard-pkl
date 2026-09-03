@@ -57,7 +57,7 @@ new class extends Component
         <!-- 360 Viewer Canvas Area -->
         <div class="lg:col-span-3 bg-zinc-900 rounded-xl overflow-hidden shadow-lg border border-zinc-700 relative h-[500px]">
             @if($activeScene)
-                <div id="panorama-viewer" class="w-full h-full"></div>
+                <div wire:ignore id="panorama-viewer" class="w-full h-full"></div>
 
                 <div class="absolute bottom-3 left-3 bg-black/70 text-white text-[10px] px-3 py-1.5 rounded-lg backdrop-blur">
                     💡 <b>Petunjuk Admin:</b> Klik di mana saja pada tampilan 360° untuk memasang <b>Hotspot Navigasi (Floating Button)</b>.
@@ -138,48 +138,75 @@ new class extends Component
     <script>
         let viewerInstance = null;
 
-        function renderPannellum() {
+        function initOrUpdatePannellum(imageUrl, hotspotsData) {
             const container = document.getElementById('panorama-viewer');
             if (!container) return;
 
+            // 1. Jika instance sudah ada, hancurkan secara bersih terlebih dahulu
             if (viewerInstance) {
-                viewerInstance.destroy();
+                try {
+                    viewerInstance.destroy();
+                } catch (e) {
+                    console.log('Clearing old instance');
+                }
+                viewerInstance = null;
             }
 
-            const hotspotsData = [
-                @foreach($activeScene->hotspots as $hs)
-                {
-                    "pitch": {{ $hs->pitch }},
-                    "yaw": {{ $hs->yaw }},
-                    "type": "scene",
-                    "text": "{{ $hs->title }}",
-                    "sceneId": "{{ $hs->target_scene_id }}",
-                    "clickHandlerFunc": function() {
-                        @this.call('selectScene', '{{ $hs->target_scene_id }}');
+            // 2. Jika gambar valid, buat instance baru
+            if (imageUrl) {
+                viewerInstance = pannellum.viewer('panorama-viewer', {
+                    "type": "equirectangular",
+                    "panorama": imageUrl,
+                    "autoLoad": true,
+                    "hotSpots": hotspotsData || []
+                });
+
+                // Tangkap klik mouse untuk penentuan koordinat Hotspot
+                viewerInstance.on('mousedown', function(event) {
+                    const coords = viewerInstance.mouseEventToCoords(event);
+                    if (coords && coords[0] !== undefined) {
+                        @this.call('captureHotspotCoords', coords[0], coords[1]);
                     }
-                },
-                @endforeach
-            ];
-
-            viewerInstance = pannellum.viewer('panorama-viewer', {
-                "type": "equirectangular",
-                "panorama": "{{ $activeScene->image_url }}",
-                "autoLoad": true,
-                "hotSpots": hotspotsData
-            });
-
-            // Tangkap event klik pengguna pada panorama untuk mengambil koordinat Pitch & Yaw
-            viewerInstance.on('mousedown', function(event) {
-                const coords = viewerInstance.mouseEventToCoords(event);
-                if (coords && coords[0] !== undefined) {
-                    @this.call('captureHotspotCoords', coords[0], coords[1]);
-                }
-            });
+                });
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', renderPannellum);
-        document.addEventListener('livewire:navigated', renderPannellum);
-        Livewire.on('load-scene', () => setTimeout(renderPannellum, 200));
+        function renderCurrentScene() {
+            @if($activeScene && $activeScene->image_url)
+                const imageUrl = "{{ $activeScene->image_url }}";
+                const hotspotsData = [
+                    @foreach($activeScene->hotspots as $hs)
+                    {
+                        "pitch": {{ $hs->pitch }},
+                        "yaw": {{ $hs->yaw }},
+                        "type": "scene",
+                        "text": "{{ $hs->title }}",
+                        "sceneId": "{{ $hs->target_scene_id }}",
+                        "clickHandlerFunc": function() {
+                            @this.call('selectScene', '{{ $hs->target_scene_id }}');
+                        }
+                    },
+                    @endforeach
+                ];
+
+                initOrUpdatePannellum(imageUrl, hotspotsData);
+            @endif
+        }
+
+        // Dipanggil saat halaman pertama kali dibuka
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(renderCurrentScene, 100);
+        });
+
+        // Dipanggil saat navigasi antar-halaman Livewire (wire:navigate)
+        document.addEventListener('livewire:navigated', () => {
+            setTimeout(renderCurrentScene, 100);
+        });
+
+        // Dipanggil setiap kali event Livewire 'load-scene' dipicu
+        Livewire.on('load-scene', () => {
+            setTimeout(renderCurrentScene, 150);
+        });
     </script>
     @endif
 </div>

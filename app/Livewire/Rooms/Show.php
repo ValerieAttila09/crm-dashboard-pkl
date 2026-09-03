@@ -67,13 +67,15 @@ class Show extends Component
 
         $fileName = $this->new_scene_image->hashName();
 
-        // Upload via put content
+        // 1. Upload file ke Supabase S3
         Storage::disk('supabase')->put(
             $fileName,
             file_get_contents($this->new_scene_image->getRealPath())
         );
 
-        $imageUrl = Storage::disk('supabase')->url($fileName);
+        // 2. Format URL Publik resmi Supabase Storage
+        $bucket = env('AWS_BUCKET', 'room-360');
+        $imageUrl = "https://rervvjhlozoxojtikygk.supabase.co/storage/v1/object/public/{$bucket}/{$fileName}";
 
         if ($this->is_default) {
             RoomScene::where('room_id', $this->room->id)->update(['is_default' => false]);
