@@ -55,9 +55,13 @@ new class extends Component
         </div>
 
         <!-- 360 Viewer Canvas Area -->
-        <div class="lg:col-span-3 bg-zinc-900 rounded-xl overflow-hidden shadow-lg border border-zinc-700 relative h-[500px]">
+        <div class="lg:col-span-3 bg-zinc-900 rounded-xl overflow-hidden shadow-lg border border-zinc-700 relative h-125">
             @if($activeScene)
                 <div wire:ignore id="panorama-viewer" class="w-full h-full"></div>
+
+                <button wire:click="openHotspotEditor" class="absolute top-3 right-3 z-10 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow">
+                    + Add Hotspot Navigation
+                </button>
 
                 <div class="absolute bottom-3 left-3 bg-black/70 text-white text-[10px] px-3 py-1.5 rounded-lg backdrop-blur">
                     💡 <b>Petunjuk Admin:</b> Klik di mana saja pada tampilan 360° untuk memasang <b>Hotspot Navigasi (Floating Button)</b>.
@@ -99,35 +103,55 @@ new class extends Component
         </div>
     @endif
 
-    <!-- Modal Form Tambah Hotspot (Klik Result) -->
+    <!-- Hotspot Editor -->
     @if($isHotspotModalOpen)
-        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 w-full max-w-md shadow-xl border border-zinc-700 space-y-4 text-xs">
-                <h2 class="text-base font-bold text-gray-900 dark:text-white">Pasang Hotspot Navigasi</h2>
-
-                <div class="p-2.5 bg-indigo-50 dark:bg-zinc-900 rounded-lg text-[11px] space-y-1">
-                    <p class="font-bold text-indigo-700 dark:text-indigo-300">Koordinat Tertangkap:</p>
-                    <p class="text-gray-600 dark:text-gray-400">Pitch (Y): <b>{{ $clickedPitch }}</b> | Yaw (X): <b>{{ $clickedYaw }}</b></p>
+        <div class="fixed inset-0 bg-black/70 z-50 flex items-stretch justify-center p-3 sm:p-6">
+            <div class="bg-white dark:bg-zinc-800 rounded-xl w-full h-full shadow-xl border border-zinc-700 overflow-hidden flex flex-col">
+                <div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-gray-200 dark:border-zinc-700">
+                    <div>
+                        <h2 class="text-base font-bold text-gray-900 dark:text-white">Pasang Hotspot Navigasi</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Pilih titik tujuan perpindahan pada panorama {{ $activeScene?->title }}.</p>
+                    </div>
+                    <button wire:click="$set('isHotspotModalOpen', false)" class="px-3 py-2 bg-gray-200 dark:bg-zinc-700 rounded text-xs font-semibold">Tutup</button>
                 </div>
 
-                <div>
-                    <label class="block font-semibold mb-1 dark:text-gray-300">Pilih Ruangan Tujuan</label>
-                    <select wire:model="target_scene_id" class="w-full p-2 border rounded dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">
-                        <option value="">-- Pilih Ruangan Tujuan --</option>
-                        @foreach($room->scenes->where('id', '!=', $activeSceneId) as $sc)
-                            <option value="{{ $sc->id }}">{{ $sc->title }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]">
+                    <div class="relative min-h-90 bg-zinc-950">
+                        <div wire:ignore id="hotspot-editor-viewer" class="w-full h-full"></div>
+                        <div class="absolute left-4 bottom-4 bg-black/70 text-white text-xs px-3 py-2 rounded-lg">Aktifkan mode penempatan, lalu klik titik pada panorama.</div>
+                    </div>
 
-                <div>
-                    <label class="block font-semibold mb-1 dark:text-gray-300">Label Tooltip Tombol</label>
-                    <input type="text" wire:model="hotspot_title" placeholder="misal: Masuk ke Kamar Mandi" class="w-full p-2 border rounded dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">
-                </div>
+                    <div class="p-5 space-y-5 overflow-y-auto border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-zinc-700 text-xs">
+                        <button type="button" id="enable-hotspot-placement" class="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold">Aktifkan Penempatan Hotspot</button>
 
-                <div class="flex justify-end gap-2 pt-2">
-                    <button wire:click="$set('isHotspotModalOpen', false)" class="px-4 py-2 bg-gray-200 rounded font-semibold">Batal</button>
-                    <button wire:click="storeHotspot" class="px-4 py-2 bg-indigo-600 text-white rounded font-semibold">Simpan Hotspot</button>
+                        <div class="p-3 bg-indigo-50 dark:bg-zinc-900 rounded-lg space-y-1">
+                            <p class="font-bold text-indigo-700 dark:text-indigo-300">Koordinat Terpilih</p>
+                            <p class="text-gray-600 dark:text-gray-400">Pitch (Y): <b>{{ $clickedPitch }}</b></p>
+                            <p class="text-gray-600 dark:text-gray-400">Yaw (X): <b>{{ $clickedYaw }}</b></p>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold mb-1 dark:text-gray-300">Pilih Ruangan Tujuan</label>
+                            <select wire:model="target_scene_id" class="w-full p-2 border rounded dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">
+                                <option value="">-- Pilih Ruangan Tujuan --</option>
+                                @foreach($room->scenes->where('id', '!=', $activeSceneId) as $sc)
+                                    <option value="{{ $sc->id }}">{{ $sc->title }}</option>
+                                @endforeach
+                            </select>
+                            @error('target_scene_id') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold mb-1 dark:text-gray-300">Label Tooltip Tombol</label>
+                            <input type="text" wire:model="hotspot_title" placeholder="misal: Masuk ke Kamar Mandi" class="w-full p-2 border rounded dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">
+                            @error('hotspot_title') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-3">
+                            <button wire:click="$set('isHotspotModalOpen', false)" class="px-4 py-2 bg-gray-200 dark:bg-zinc-700 rounded font-semibold">Batal</button>
+                            <button wire:click="storeHotspot" class="px-4 py-2 bg-indigo-600 text-white rounded font-semibold">Simpan Hotspot</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -137,6 +161,8 @@ new class extends Component
     @if($activeScene)
     <script>
         let viewerInstance = null;
+        let hotspotEditorInstance = null;
+        let hotspotPlacementMode = false;
 
         function initOrUpdatePannellum(imageUrl, hotspotsData) {
             const container = document.getElementById('panorama-viewer');
@@ -161,36 +187,76 @@ new class extends Component
                     "hotSpots": hotspotsData || []
                 });
 
-                // Tangkap klik mouse untuk penentuan koordinat Hotspot
-                viewerInstance.on('mousedown', function(event) {
-                    const coords = viewerInstance.mouseEventToCoords(event);
-                    if (coords && coords[0] !== undefined) {
-                        @this.call('captureHotspotCoords', coords[0], coords[1]);
-                    }
-                });
             }
         }
 
-        function renderCurrentScene() {
-            @if($activeScene && $activeScene->image_url)
-                const imageUrl = "{{ $activeScene->image_url }}";
-                const hotspotsData = [
-                    @foreach($activeScene->hotspots as $hs)
-                    {
-                        "pitch": {{ $hs->pitch }},
-                        "yaw": {{ $hs->yaw }},
-                        "type": "scene",
-                        "text": "{{ $hs->title }}",
-                        "sceneId": "{{ $hs->target_scene_id }}",
-                        "clickHandlerFunc": function() {
-                            @this.call('selectScene', '{{ $hs->target_scene_id }}');
-                        }
-                    },
-                    @endforeach
-                ];
+        function initHotspotEditor(sceneData) {
+            const container = document.getElementById('hotspot-editor-viewer');
+            if (!container || !sceneData?.imageUrl) return;
 
-                initOrUpdatePannellum(imageUrl, hotspotsData);
-            @endif
+            if (hotspotEditorInstance) {
+                try {
+                    hotspotEditorInstance.destroy();
+                } catch (e) {
+                    console.log('Clearing old hotspot editor');
+                }
+            }
+
+            hotspotPlacementMode = false;
+            hotspotEditorInstance = pannellum.viewer('hotspot-editor-viewer', {
+                type: 'equirectangular',
+                panorama: sceneData.imageUrl,
+                autoLoad: true,
+                hotSpots: []
+            });
+
+            hotspotEditorInstance.on('mousedown', function(event) {
+                if (!hotspotPlacementMode) return;
+
+                const coords = hotspotEditorInstance.mouseEventToCoords(event);
+                if (coords && coords[0] !== undefined) {
+                    hotspotEditorInstance.removeHotSpot('pending-hotspot');
+                    hotspotEditorInstance.addHotSpot({
+                        id: 'pending-hotspot',
+                        pitch: coords[0],
+                        yaw: coords[1],
+                        type: 'info',
+                        text: 'Titik hotspot'
+                    });
+                    hotspotPlacementMode = false;
+                    document.getElementById('enable-hotspot-placement').textContent = 'Pilih Ulang Titik Hotspot';
+                    @this.call('captureHotspotCoords', coords[0], coords[1]);
+                }
+            });
+        }
+
+        function renderCurrentScene(sceneData) {
+            if (!sceneData) {
+                sceneData = @js($activeScene ? [
+                    'imageUrl' => $activeScene->image_url,
+                    'hotspots' => $activeScene->hotspots->map(fn ($hotspot) => [
+                        'pitch' => (float) $hotspot->pitch,
+                        'yaw' => (float) $hotspot->yaw,
+                        'title' => $hotspot->title,
+                        'targetSceneId' => (string) $hotspot->target_scene_id,
+                    ])->values()->all(),
+                ] : null);
+            }
+
+            if (sceneData?.imageUrl) {
+                const hotspotsData = (sceneData.hotspots || []).map((hotspot) => ({
+                    pitch: hotspot.pitch,
+                    yaw: hotspot.yaw,
+                    type: 'scene',
+                    text: hotspot.title,
+                    sceneId: hotspot.targetSceneId,
+                    clickHandlerFunc: function() {
+                        @this.call('selectScene', hotspot.targetSceneId);
+                    }
+                }));
+
+                initOrUpdatePannellum(sceneData.imageUrl, hotspotsData);
+            }
         }
 
         // Dipanggil saat halaman pertama kali dibuka
@@ -204,8 +270,19 @@ new class extends Component
         });
 
         // Dipanggil setiap kali event Livewire 'load-scene' dipicu
-        Livewire.on('load-scene', () => {
-            setTimeout(renderCurrentScene, 150);
+        Livewire.on('load-scene', (event) => {
+            setTimeout(() => renderCurrentScene(event.scene), 150);
+        });
+
+        Livewire.on('open-hotspot-editor', (event) => {
+            setTimeout(() => initHotspotEditor(event.scene), 150);
+        });
+
+        document.addEventListener('click', (event) => {
+            if (event.target.id === 'enable-hotspot-placement') {
+                hotspotPlacementMode = true;
+                event.target.textContent = 'Klik Titik pada Panorama';
+            }
         });
     </script>
     @endif

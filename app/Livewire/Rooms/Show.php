@@ -9,6 +9,7 @@ use App\Models\RoomScene;
 use App\Models\RoomHotspot;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class Show extends Component
 {
@@ -45,6 +46,16 @@ class Show extends Component
             ->with(['property', 'scenes.hotspots.targetScene'])
             ->findOrFail($id);
 
+        if ($this->room->scenes->isEmpty() && $this->room->panorama_360_url) {
+            RoomScene::create([
+                'room_id' => $this->room->id,
+                'title' => 'Scene Utama',
+                'image_url' => $this->room->panorama_360_url,
+                'is_default' => true,
+            ]);
+            $this->room->load('scenes.hotspots.targetScene');
+        }
+
         $defaultScene = $this->room->scenes->where('is_default', true)->first() ?? $this->room->scenes->first();
         $this->activeSceneId = $defaultScene ? $defaultScene->id : null;
     }
@@ -52,7 +63,22 @@ class Show extends Component
     public function selectScene($sceneId)
     {
         $this->activeSceneId = $sceneId;
-        $this->dispatch('load-scene', sceneId: $sceneId);
+        $this->dispatch('load-scene', scene: $this->viewerSceneData($sceneId));
+    }
+
+    private function viewerSceneData($sceneId): array
+    {
+        $scene = $this->room->scenes->firstWhere('id', $sceneId);
+
+        return [
+            'imageUrl' => $scene?->image_url,
+            'hotspots' => $scene?->hotspots->map(fn (RoomHotspot $hotspot) => [
+                'pitch' => (float) $hotspot->pitch,
+                'yaw' => (float) $hotspot->yaw,
+                'title' => $hotspot->title,
+                'targetSceneId' => (string) $hotspot->target_scene_id,
+            ])->values()->all() ?? [],
+        ];
     }
 
     public function openSceneModal()
@@ -91,7 +117,7 @@ class Show extends Component
         $this->isSceneModalOpen = false;
         $this->activeSceneId = $scene->id;
         $this->room->load('scenes.hotspots.targetScene');
-        $this->dispatch('load-scene', sceneId: $scene->id);
+        $this->dispatch('load-scene', scene: $this->viewerSceneData($scene->id));
 
         session()->flash('message', 'Ruangan 360° berhasil diunggah.');
     }
@@ -105,10 +131,19 @@ class Show extends Component
         $this->isHotspotModalOpen = true;
     }
 
+    public function openHotspotEditor()
+    {
+        $this->isHotspotModalOpen = true;
+        $this->dispatch('open-hotspot-editor', scene: $this->viewerSceneData($this->activeSceneId));
+    }
+
     public function storeHotspot()
     {
         $this->validate([
-            'target_scene_id' => 'required|exists:room_scenes,id',
+            'target_scene_id' => [
+                'required',
+                Rule::exists('room_scenes', 'id')->where(fn ($query) => $query->where('room_id', $this->room->id)),
+            ],
             'hotspot_title' => 'required|string|max:255',
         ]);
 
@@ -122,7 +157,7 @@ class Show extends Component
 
         $this->isHotspotModalOpen = false;
         $this->room->load('scenes.hotspots.targetScene');
-        $this->dispatch('load-scene', sceneId: $this->activeSceneId);
+        $this->dispatch('load-scene', scene: $this->viewerSceneData($this->activeSceneId));
 
         session()->flash('message', 'Hotspot navigasi berhasil ditambahkan.');
     }

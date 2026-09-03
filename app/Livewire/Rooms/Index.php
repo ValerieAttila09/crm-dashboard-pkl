@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use App\Models\Room;
+use App\Models\RoomScene;
 use App\Models\Property;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -96,7 +97,8 @@ class Index extends Component
             $imagePath = Storage::disk('supabase')->url($fileName);
         }
 
-        Room::updateOrCreate(
+        $isNewRoom = !$this->roomId;
+        $room = Room::updateOrCreate(
             ['id' => $this->roomId],
             [
                 'team_id' => $currentTeam->id,
@@ -108,6 +110,15 @@ class Index extends Component
                 'panorama_360_url' => $imagePath,
             ]
         );
+
+        if ($imagePath && ($isNewRoom || !$room->scenes()->exists())) {
+            RoomScene::create([
+                'room_id' => $room->id,
+                'title' => 'Scene Utama',
+                'image_url' => $imagePath,
+                'is_default' => true,
+            ]);
+        }
 
         session()->flash('message', 'Kamar berhasil disimpan.');
         $this->closeModal();
