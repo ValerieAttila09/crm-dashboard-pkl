@@ -4,7 +4,7 @@ namespace App\Livewire\Rooms;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\WithFileUploads; // Import trait file upload Livewire
+use Livewire\WithFileUploads;
 use App\Models\Room;
 use App\Models\Property;
 use Illuminate\Support\Facades\Auth;
@@ -12,19 +12,19 @@ use Illuminate\Support\Facades\Storage;
 
 class Index extends Component
 {
-    use WithPagination, WithFileUploads; // Gunakan WithFileUploads
+    use WithPagination, WithFileUploads;
 
     public $search = '';
     public $statusFilter = '';
     public $propertyFilter = '';
-    public $viewMode = 'grid';
+    public $viewMode = 'list';
 
     // Form Modal Fields
     public $isModalOpen = false;
     public $roomId = null;
     public $property_id, $room_number, $type = 'Studio', $price_per_month = 0, $status = 'available';
-    public $panorama_image; // Menampung file upload baru
-    public $old_panorama_url; // Menampung URL gambar lama saat mode edit
+    public $panorama_image;
+    public $old_panorama_url;
 
     // Inline Property
     public $isCreatingProperty = false;
@@ -39,7 +39,7 @@ class Index extends Component
             'type' => 'required|string|max:50',
             'price_per_month' => 'required|numeric|min:0',
             'status' => 'required|in:available,occupied,maintenance',
-            'panorama_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200', // Max 10MB (Foto 360 biasanya berukuran besar)
+            'panorama_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
         ];
     }
 
@@ -76,20 +76,24 @@ class Index extends Component
 
         $imagePath = $this->old_panorama_url;
 
-        // Jika user mengunggah berkas gambar 360 baru
         if ($this->panorama_image) {
-            // Hapus gambar lama di Supabase jika ada
+            // 1. Hapus file lama jika ada
             if ($this->old_panorama_url) {
-                // Ambil nama file relative dari URL
                 $oldFileName = basename(parse_url($this->old_panorama_url, PHP_URL_PATH));
                 Storage::disk('supabase')->delete($oldFileName);
             }
 
-            // Upload langsung ke Supabase Storage (Bucket: room-360)
-            $storedPath = $this->panorama_image->store('', 'supabase');
-            
-            // Ambil Public URL Supabase
-            $imagePath = Storage::disk('supabase')->url($storedPath);
+            // 2. Ambil nama file unik
+            $fileName = $this->panorama_image->hashName();
+
+            // 3. Upload konten file langsung (bebas error SignatureDoesNotMatch)
+            Storage::disk('supabase')->put(
+                $fileName,
+                file_get_contents($this->panorama_image->getRealPath())
+            );
+
+            // 4. Ambil URL Publik Supabase
+            $imagePath = Storage::disk('supabase')->url($fileName);
         }
 
         Room::updateOrCreate(
@@ -105,7 +109,7 @@ class Index extends Component
             ]
         );
 
-        session()->flash('message', $this->roomId ? 'Data kamar berhasil diperbarui.' : 'Kamar baru berhasil ditambahkan.');
+        session()->flash('message', 'Kamar berhasil disimpan.');
         $this->closeModal();
     }
 

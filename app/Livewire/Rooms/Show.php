@@ -65,11 +65,16 @@ class Show extends Component
     {
         $this->validate();
 
-        // Upload gambar ke Supabase Storage
-        $storedPath = $this->new_scene_image->store('', 'supabase');
-        $imageUrl = Storage::disk('supabase')->url($storedPath);
+        $fileName = $this->new_scene_image->hashName();
 
-        // Jika diset default, reset scene lain
+        // Upload via put content
+        Storage::disk('supabase')->put(
+            $fileName,
+            file_get_contents($this->new_scene_image->getRealPath())
+        );
+
+        $imageUrl = Storage::disk('supabase')->url($fileName);
+
         if ($this->is_default) {
             RoomScene::where('room_id', $this->room->id)->update(['is_default' => false]);
         }
@@ -86,7 +91,7 @@ class Show extends Component
         $this->room->load('scenes.hotspots.targetScene');
         $this->dispatch('load-scene', sceneId: $scene->id);
 
-        session()->flash('message', 'Ruangan 360° baru berhasil ditambahkan.');
+        session()->flash('message', 'Ruangan 360° berhasil diunggah.');
     }
 
     // Dipanggil via Event JavaScript saat user mengklik viewer 360°

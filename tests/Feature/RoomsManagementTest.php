@@ -10,6 +10,8 @@ use App\Models\Room;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -28,6 +30,8 @@ class RoomsManagementTest extends TestCase
 
     public function test_admin_can_create_a_new_room(): void
     {
+        Storage::fake('supabase');
+
         $team = Team::factory()->create();
         $user = $this->makeAuthenticatedUserForTeam($team);
         $property = Property::create([
@@ -36,6 +40,8 @@ class RoomsManagementTest extends TestCase
             'address' => 'Jl. Melati No. 12',
         ]);
 
+        $uploadedFile = UploadedFile::fake()->image('panorama.jpg', 1200, 800);
+
         Livewire::actingAs($user)
             ->test(RoomsIndex::class)
             ->set('property_id', $property->id)
@@ -43,10 +49,14 @@ class RoomsManagementTest extends TestCase
             ->set('type', 'Studio')
             ->set('price_per_month', 2500000)
             ->set('status', 'available')
-            ->set('panorama_360_url', 'https://example.com/panorama.jpg')
+            ->set('panorama_image', $uploadedFile)
             ->call('store')
             ->assertHasNoErrors();
 
+        $room = Room::query()->where('room_number', 'A-101')->first();
+
+        $this->assertNotNull($room);
+        $this->assertNotNull($room->panorama_360_url);
         $this->assertDatabaseHas('rooms', [
             'team_id' => $team->id,
             'property_id' => $property->id,
