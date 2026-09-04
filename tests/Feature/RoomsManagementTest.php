@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\TeamRole;
 use App\Livewire\Rooms\Index as RoomsIndex;
+use App\Livewire\Rooms\NavigationEditor;
 use App\Livewire\Rooms\Show as RoomShow;
 use App\Models\Customer;
 use App\Models\Property;
@@ -179,5 +180,40 @@ class RoomsManagementTest extends TestCase
                 'roomNumber' => $room->room_number,
                 'scene' => $secondScene->id,
             ]));
+    }
+
+    public function test_navigation_editor_stores_hotspot_metadata(): void
+    {
+        $team = Team::factory()->create();
+        $user = $this->makeAuthenticatedUserForTeam($team);
+        $property = Property::create(['team_id' => $team->id, 'name' => 'Oak Terrace']);
+        $room = Room::create([
+            'team_id' => $team->id,
+            'property_id' => $property->id,
+            'room_number' => 'E-404',
+            'type' => 'Studio',
+            'price_per_month' => 2500000,
+            'status' => 'available',
+        ]);
+        $sourceScene = RoomScene::create(['room_id' => $room->id, 'title' => 'Tamu', 'image_url' => 'https://example.test/tamu.jpg', 'is_default' => true]);
+        $targetScene = RoomScene::create(['room_id' => $room->id, 'title' => 'Dapur', 'image_url' => 'https://example.test/dapur.jpg']);
+
+        Livewire::actingAs($user)
+            ->test(NavigationEditor::class, ['roomNumber' => $room->room_number, 'scene' => $sourceScene->id])
+            ->set('pitch', 12.5)
+            ->set('yaw', -30.25)
+            ->set('hotspotTitle', 'Ke Dapur')
+            ->set('hotspotLabel', 'Dapur')
+            ->set('hotspotDescription', 'Buka area dapur')
+            ->set('targetSceneId', $targetScene->id)
+            ->call('storeHotspot')
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('room_hotspots', [
+            'room_scene_id' => $sourceScene->id,
+            'target_scene_id' => $targetScene->id,
+            'label' => 'Dapur',
+            'description' => 'Buka area dapur',
+        ]);
     }
 }

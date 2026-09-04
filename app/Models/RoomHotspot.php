@@ -14,6 +14,8 @@ class RoomHotspot extends Model
         'room_scene_id',
         'target_scene_id',
         'title',
+        'label',
+        'description',
         'pitch',
         'yaw',
     ];

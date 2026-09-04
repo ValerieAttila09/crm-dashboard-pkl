@@ -47,6 +47,7 @@ class Show extends Component
 
         if ($this->room->scenes->isEmpty() && $this->room->panorama_360_url) {
             RoomScene::create([
+                'room_id' => $this->room->id,
                 'title' => 'Scene Utama',
                 'image_url' => $this->room->panorama_360_url,
                 'is_default' => true,
