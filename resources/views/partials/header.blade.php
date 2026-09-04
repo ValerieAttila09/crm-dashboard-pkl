@@ -39,6 +39,8 @@
     <div class="flex items-center gap-4">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
+        <livewire:global-search class="lg:hidden"/>
+
         <div class="flex min-w-0 flex-col gap-1">
             <nav aria-label="Breadcrumb" class="hidden items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400 sm:flex">
                 @foreach ($breadcrumbs as $breadcrumb)
