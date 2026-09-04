@@ -35,7 +35,7 @@ class Show extends Component
     {
         $currentTeam = Auth::user()->currentTeam;
         $this->room = Room::where('team_id', $currentTeam->id)
-            ->with(['property', 'scenes'])
+            ->with(['property', 'scenes.hotspots.targetScene'])
             ->where(function ($query) use ($roomNumber) {
                 $query->where('room_number', $roomNumber);
 
@@ -52,7 +52,7 @@ class Show extends Component
                 'image_url' => $this->room->panorama_360_url,
                 'is_default' => true,
             ]);
-            $this->room->load('scenes');
+            $this->room->load('scenes.hotspots.targetScene');
         }
 
         $defaultScene = $this->room->scenes->where('is_default', true)->first() ?? $this->room->scenes->first();
@@ -85,6 +85,19 @@ class Show extends Component
             return [(string) $scene->id => [
                 'title' => $scene->title,
                 'imageUrl' => $scene->image_url,
+                'hotspots' => $scene->hotspots->map(fn ($hotspot) => [
+                    'id' => (string) $hotspot->id,
+                    'pitch' => (float) $hotspot->pitch,
+                    'yaw' => (float) $hotspot->yaw,
+                    'label' => $hotspot->label ?: $hotspot->title,
+                    'description' => $hotspot->description,
+                    'targetSceneId' => (string) $hotspot->target_scene_id,
+                    'targetUrl' => route('rooms.show', [
+                        'current_team' => Auth::user()->currentTeam->slug,
+                        'roomNumber' => $this->room->room_number,
+                        'scene' => $hotspot->target_scene_id,
+                    ]),
+                ])->values()->all(),
             ]];
         })->all();
     }

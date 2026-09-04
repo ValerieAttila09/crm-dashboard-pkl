@@ -169,11 +169,26 @@ class RoomsManagementTest extends TestCase
             'title' => 'Dapur',
             'image_url' => 'https://example.test/kitchen.jpg',
         ]);
+        $hotspot = \App\Models\RoomHotspot::create([
+            'room_scene_id' => $firstScene->id,
+            'target_scene_id' => $secondScene->id,
+            'title' => 'Ke Dapur',
+            'label' => 'Dapur',
+            'description' => 'Buka dapur',
+            'pitch' => 10,
+            'yaw' => -20,
+        ]);
+
         Livewire::actingAs($user)
             ->test(RoomShow::class, ['roomNumber' => $room->room_number])
-            ->assertSee((string) $room->id)
+            ->assertSee($room->room_number)
             ->assertSee('Ruang Tamu')
             ->assertSee('Dapur')
+            ->assertSee(route('rooms.show', [
+                'current_team' => $team->slug,
+                'roomNumber' => $room->room_number,
+                'scene' => $secondScene->id,
+            ]), false)
             ->call('selectScene', $secondScene->id)
             ->assertRedirect(route('rooms.show', [
                 'current_team' => $team->slug,
