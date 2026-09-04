@@ -231,4 +231,38 @@ class RoomsManagementTest extends TestCase
             'description' => 'Buka area dapur',
         ]);
     }
+
+    public function test_navigation_editor_updates_hotspot_position(): void
+    {
+        $team = Team::factory()->create();
+        $user = $this->makeAuthenticatedUserForTeam($team);
+        $property = Property::create(['team_id' => $team->id, 'name' => 'Oak Terrace']);
+        $room = Room::create(['team_id' => $team->id, 'property_id' => $property->id, 'room_number' => 'F-505', 'type' => 'Studio', 'price_per_month' => 2500000, 'status' => 'available']);
+        $sourceScene = RoomScene::create(['room_id' => $room->id, 'title' => 'Tamu', 'image_url' => 'https://example.test/tamu.jpg', 'is_default' => true]);
+        $targetScene = RoomScene::create(['room_id' => $room->id, 'title' => 'Dapur', 'image_url' => 'https://example.test/dapur.jpg']);
+        $hotspot = \App\Models\RoomHotspot::create(['room_scene_id' => $sourceScene->id, 'target_scene_id' => $targetScene->id, 'title' => 'Ke Dapur', 'label' => 'Dapur', 'pitch' => 1, 'yaw' => 2]);
+
+        Livewire::actingAs($user)
+            ->test(NavigationEditor::class, ['roomNumber' => $room->room_number, 'scene' => $sourceScene->id])
+            ->call('updateHotspotPosition', $hotspot->id, 25.5, -45.25);
+
+        $this->assertDatabaseHas('room_hotspots', ['id' => $hotspot->id, 'pitch' => 25.5, 'yaw' => -45.25]);
+    }
+
+    public function test_room_virtual_tour_can_delete_a_scene(): void
+    {
+        $team = Team::factory()->create();
+        $user = $this->makeAuthenticatedUserForTeam($team);
+        $property = Property::create(['team_id' => $team->id, 'name' => 'Oak Terrace']);
+        $room = Room::create(['team_id' => $team->id, 'property_id' => $property->id, 'room_number' => 'G-606', 'type' => 'Studio', 'price_per_month' => 2500000, 'status' => 'available']);
+        $firstScene = RoomScene::create(['room_id' => $room->id, 'title' => 'Tamu', 'image_url' => 'https://example.test/tamu.jpg', 'is_default' => true]);
+        $secondScene = RoomScene::create(['room_id' => $room->id, 'title' => 'Dapur', 'image_url' => 'https://example.test/dapur.jpg']);
+
+        Livewire::actingAs($user)
+            ->test(RoomShow::class, ['roomNumber' => $room->room_number])
+            ->call('deleteScene', $secondScene->id)
+            ->assertRedirect(route('rooms.show', ['current_team' => $team->slug, 'roomNumber' => $room->room_number, 'scene' => $firstScene->id]));
+
+        $this->assertDatabaseMissing('room_scenes', ['id' => $secondScene->id]);
+    }
 }

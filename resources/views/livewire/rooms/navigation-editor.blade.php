@@ -1,31 +1,31 @@
-<div class="min-h-screen bg-zinc-950 text-white">
-    <div class="flex flex-col gap-4 border-b border-zinc-800 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+<div class="min-h-screen bg-white border border-zinc-200">
+    <div class="flex flex-col gap-4 border-b border-zinc-300 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <a href="{{ route('rooms.show', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number, 'scene' => $activeScene->id]) }}" class="text-xs text-indigo-300 hover:underline">Kembali ke Virtual Tour</a>
-            <h1 class="mt-1 text-xl font-bold">Editor Navigation {{ $room->room_number }}</h1>
+            <a href="{{ route('rooms.show', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number, 'scene' => $activeScene->id]) }}" class="text-xs text-indigo-600 hover:underline">Kembali ke Virtual Tour</a>
+            <h1 class="mt-1 text-zinc-950 text-xl font-bold">Editor Navigation {{ $room->room_number }}</h1>
             <p class="text-xs text-zinc-400">Scene: {{ $activeScene->title }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <button type="button" id="add-hotspot" class="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold hover:bg-indigo-500">+ Add Hotspot</button>
-            <button type="button" id="undo-hotspot" class="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold">Undo</button>
-            <button type="button" id="redo-hotspot" class="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold">Redo</button>
-            <button type="button" id="reset-hotspot" class="rounded-lg bg-rose-900/80 px-3 py-2 text-xs font-semibold">Reset</button>
+            <button type="button" id="add-hotspot" class="rounded-md text-white bg-indigo-600 px-4 py-2 text-xs font-semibold hover:bg-indigo-500">+ Add Hotspot</button>
+            <button type="button" id="undo-hotspot" class="rounded-md text-white bg-zinc-800 px-3 py-2 text-xs font-semibold">Undo</button>
+            <button type="button" id="redo-hotspot" class="rounded-md text-white bg-zinc-800 px-3 py-2 text-xs font-semibold">Redo</button>
+            <button type="button" id="reset-hotspot" class="rounded-md text-white bg-rose-800/80 px-3 py-2 text-xs font-semibold">Reset</button>
         </div>
     </div>
 
     <div class="grid min-h-[calc(100vh-85px)] grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div class="relative min-h-[520px] bg-black">
+        <div class="relative min-h-130 bg-white">
             <div id="navigation-panorama" wire:ignore class="absolute inset-0"></div>
             <div class="pointer-events-none absolute bottom-4 left-4 rounded bg-black/70 px-3 py-2 text-xs text-zinc-200">Aktifkan Add Hotspot, lalu klik posisi pada panorama.</div>
         </div>
-        <aside class="border-t border-zinc-800 bg-zinc-900 p-5 lg:border-l lg:border-t-0">
+        <aside class="border-t border-zinc-300 bg-white p-5 lg:border-l lg:border-t-0">
             <h2 class="font-semibold">Scene Tujuan</h2>
             <div class="mt-3 space-y-2">
                 @foreach($scenes as $targetScene)
-                    <a href="{{ route('rooms.navigation.edit', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number, 'scene' => $targetScene->id]) }}" class="block rounded border border-zinc-700 px-3 py-2 text-xs hover:border-indigo-400 {{ $targetScene->id === $activeScene->id ? 'border-indigo-500 bg-indigo-950/50' : '' }}">{{ $targetScene->title }}</a>
+                    <a href="{{ route('rooms.navigation.edit', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number, 'scene' => $targetScene->id]) }}" class="block rounded border border-zinc-200 px-3 py-2 text-xs hover:border-indigo-400 {{ $targetScene->id === $activeScene->id ? 'border-indigo-500 bg-indigo-800/75 text-white' : '' }}">{{ $targetScene->title }}</a>
                 @endforeach
             </div>
-            <div class="mt-8 border-t border-zinc-800 pt-5 text-xs text-zinc-400">
+            <div class="mt-8 border-t border-zinc-200 pt-5 text-xs text-zinc-600">
                 <p>Hotspot tersimpan: {{ $hotspots->count() }}</p>
                 <p class="mt-2">Undo/Redo/Reset mengelola marker draft di editor. Data disimpan setelah formulir hotspot dikonfirmasi.</p>
             </div>
@@ -61,15 +61,21 @@
     <script>
         (() => {
             if (window.navigationEditor) return;
-            const viewer = pannellum.viewer('navigation-panorama', { type: 'equirectangular', panorama: @js($activeScene->image_url), autoLoad: true, hotSpots: @js($hotspots->map(fn ($hotspot) => ['id' => (string) $hotspot->id, 'pitch' => (float) $hotspot->pitch, 'yaw' => (float) $hotspot->yaw, 'type' => 'info', 'text' => $hotspot->label ?: $hotspot->title])->values()) });
+            const viewer = pannellum.viewer('navigation-panorama', { type: 'equirectangular', panorama: @js($activeScene->image_url), autoLoad: true, hotSpots: @js($hotspots->map(fn ($hotspot) => ['id' => (string) $hotspot->id, 'pitch' => (float) $hotspot->pitch, 'yaw' => (float) $hotspot->yaw, 'type' => 'info', 'cssClass' => 'navigation-hotspot-' . $hotspot->id, 'text' => $hotspot->label ?: $hotspot->title])->values()) });
             let placing = false;
-            let history = [];
-            let historyIndex = -1;
+            let history = [@js($hotspots->map(fn ($hotspot) => ['id' => (string) $hotspot->id, 'pitch' => (float) $hotspot->pitch, 'yaw' => (float) $hotspot->yaw, 'type' => 'info', 'cssClass' => 'navigation-hotspot-' . $hotspot->id, 'text' => $hotspot->label ?: $hotspot->title])->values())];
+            let historyIndex = 0;
+            let selectedHotspotId = null;
+            let draggingHotspotId = null;
             const snapshot = () => historyIndex < 0 ? [] : history[historyIndex];
             const saveHistory = (items) => { history = history.slice(0, historyIndex + 1); history.push(items); historyIndex++; };
             const renderDraft = (items) => { document.querySelectorAll('.pnlm-hotspot').forEach((el) => el.remove()); items.forEach((item) => viewer.addHotSpot(item)); };
             document.getElementById('add-hotspot').onclick = () => { placing = true; document.getElementById('add-hotspot').textContent = 'Klik Panorama...'; };
             viewer.on('mousedown', (event) => { if (!placing) return; const coords = viewer.mouseEventToCoords(event); if (!coords) return; placing = false; document.getElementById('add-hotspot').textContent = '+ Add Hotspot'; const item = { id: `draft-${Date.now()}`, pitch: coords[0], yaw: coords[1], type: 'info', text: 'Draft hotspot' }; const next = [...snapshot(), item]; saveHistory(next); renderDraft(next); @this.call('openHotspotModal', coords[0], coords[1]); });
+            document.addEventListener('click', (event) => { const hotspot = event.target.closest('.pnlm-hotspot'); if (!hotspot) return; selectedHotspotId = [...hotspot.classList].find((name) => name.startsWith('navigation-hotspot-'))?.replace('navigation-hotspot-', '') || null; document.querySelectorAll('.pnlm-hotspot').forEach((item) => item.classList.toggle('ring-2', item === hotspot)); });
+            document.addEventListener('pointerdown', (event) => { const hotspot = event.target.closest('.pnlm-hotspot'); if (!hotspot || !selectedHotspotId) return; draggingHotspotId = selectedHotspotId; event.preventDefault(); });
+            document.addEventListener('pointermove', (event) => { if (!draggingHotspotId) return; const coords = viewer.mouseEventToCoords(event); if (!coords) return; viewer.removeHotSpot(draggingHotspotId); viewer.addHotSpot({ id: draggingHotspotId, pitch: coords[0], yaw: coords[1], type: 'info', cssClass: `navigation-hotspot-${draggingHotspotId}`, text: 'Posisi diubah' }); });
+            document.addEventListener('pointerup', (event) => { if (!draggingHotspotId) return; const coords = viewer.mouseEventToCoords(event); if (coords) @this.call('updateHotspotPosition', draggingHotspotId, coords[0], coords[1]); draggingHotspotId = null; });
             document.getElementById('undo-hotspot').onclick = () => { if (historyIndex > 0) { historyIndex--; renderDraft(snapshot()); } };
             document.getElementById('redo-hotspot').onclick = () => { if (historyIndex < history.length - 1) { historyIndex++; renderDraft(snapshot()); } };
             document.getElementById('reset-hotspot').onclick = () => { saveHistory([]); renderDraft([]); };

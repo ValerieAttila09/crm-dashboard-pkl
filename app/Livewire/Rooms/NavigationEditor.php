@@ -78,6 +78,16 @@ class NavigationEditor extends Component
         ]), navigate: false);
     }
 
+    public function updateHotspotPosition(string $hotspotId, float $pitch, float $yaw): void
+    {
+        $this->activeScene->hotspots()
+            ->whereKey($hotspotId)
+            ->update([
+                'pitch' => round($pitch, 4),
+                'yaw' => round($yaw, 4),
+            ]);
+    }
+
     public function render()
     {
         return view('livewire.rooms.navigation-editor', [

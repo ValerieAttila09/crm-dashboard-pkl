@@ -148,6 +148,29 @@ class Show extends Component
         session()->flash('message', 'Ruangan 360° berhasil diunggah.');
     }
 
+    public function deleteScene(string $sceneId): void
+    {
+        $scene = $this->room->scenes->firstWhere('id', $sceneId);
+        if (!$scene || $this->room->scenes->count() <= 1) {
+            return;
+        }
+
+        $wasActive = (string) $this->activeSceneId === (string) $scene->id;
+        $scene->delete();
+        $this->room->load('scenes.hotspots.targetScene');
+
+        if ($wasActive) {
+            $nextScene = $this->room->scenes->where('is_default', true)->first() ?? $this->room->scenes->first();
+            $this->activeSceneId = $nextScene?->id;
+        }
+
+        $this->redirect(route('rooms.show', [
+            'current_team' => Auth::user()->currentTeam->slug,
+            'roomNumber' => $this->room->room_number,
+            'scene' => $this->activeSceneId,
+        ]), navigate: false);
+    }
+
 
     public function render()
     {

@@ -22,15 +22,15 @@ new class extends Component
                 {{ $room->property->name ?? 'Properti' }} • {{ $room->type }} • Rp {{ number_format($room->price_per_month, 0, ',', '.') }}/bln
             </p>
         </div>
-
-        <button wire:click="openSceneModal" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow">
-            + Tambah Ruangan (Scene 360°)
-        </button>
-        @if($activeScene)
+        <div class="">
+            <button wire:click="openSceneModal" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow">
+                + Tambah Ruangan (Scene 360°)
+            </button>
+            @if($activeScene)
             <a href="{{ route('rooms.navigation.edit', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number, 'scene' => $activeScene->id]) }}" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-900 text-white text-xs font-semibold rounded-lg shadow">+ Add Navigation</a>
-        @endif
+            @endif
+        </div>
     </div>
-
     <!-- Main Builder Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Sidebar Daftar Scenes -->
@@ -44,10 +44,11 @@ new class extends Component
                         <a href="{{ route('rooms.show', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number, 'scene' => $scene->id]) }}" class="flex-1">
                             {{ $scene->title }}
                         </a>
-                        <a href="{{ route('rooms.navigation.edit', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number, 'scene' => $scene->id]) }}" class="text-[10px] text-indigo-600 hover:underline">Edit navigasi</a>
                         @if($scene->is_default)
                             <span class="text-[9px] bg-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded font-bold">Default</span>
                         @endif
+                        <a href="{{ route('rooms.navigation.edit', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number, 'scene' => $scene->id]) }}" class="text-[10px] text-indigo-600 hover:underline">Edit navigasi</a>
+                        <button type="button" wire:click="deleteScene('{{ $scene->id }}')" wire:confirm="Hapus scene {{ $scene->title }}? Hotspot yang terkait juga akan terhapus." class="text-[10px] text-rose-600 hover:underline" @disabled($room->scenes->count() <= 1)>Hapus</button>
                     </div>
                 @empty
                     <p class="text-xs text-gray-400 italic">Belum ada foto 360°. Silakan tambah foto ruangan pertama.</p>
