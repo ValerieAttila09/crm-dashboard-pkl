@@ -89,7 +89,7 @@
                     </div>
 
                     <div class="p-4 border-t border-gray-100 dark:border-zinc-700/50 flex justify-end gap-2 bg-gray-50 dark:bg-zinc-900/50">
-                        <a href="{{ route('rooms.show', ['current_team' => auth()->user()->currentTeam->slug, 'id' => $room->id]) }}" 
+                        <a href="{{ route('rooms.show', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number]) }}"
                             class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-xs font-semibold rounded text-white shadow" 
                             >
                             🌐 Virtual Tour
@@ -152,7 +152,7 @@
                                 </span>
                             </td>
                             <td class="p-3 flex items-center gap-2">
-                                <a href="{{ route('rooms.show', ['current_team' => auth()->user()->currentTeam->slug, 'id' => $room->id]) }}" 
+                                <a href="{{ route('rooms.show', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number]) }}" 
                                     class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-xs font-semibold rounded text-white shadow" 
                                     >
                                     🌐 Virtual Tour

@@ -169,11 +169,15 @@ class RoomsManagementTest extends TestCase
             'image_url' => 'https://example.test/kitchen.jpg',
         ]);
         Livewire::actingAs($user)
-            ->test(RoomShow::class, ['id' => $room->id])
+            ->test(RoomShow::class, ['roomNumber' => $room->room_number])
+            ->assertSee((string) $room->id)
             ->assertSee('Ruang Tamu')
             ->assertSee('Dapur')
             ->call('selectScene', $secondScene->id)
-            ->assertSet('activeSceneId', $secondScene->id)
-            ->assertSee('Dapur');
+            ->assertRedirect(route('rooms.show', [
+                'current_team' => $team->slug,
+                'roomNumber' => $room->room_number,
+                'scene' => $secondScene->id,
+            ]));
     }
 }

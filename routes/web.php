@@ -31,7 +31,7 @@ Route::prefix('{current_team}')
         Route::get('rooms', RoomIndex::class)->name('rooms.index');
         Route::get('leases', LeaseIndex::class)->name('leases.index');
         Route::get('maintenance', MaintenanceIndex::class)->name('maintenance.index');
-        Route::get('rooms/{id}', RoomShow::class)->name('rooms.show');
+        Route::get('rooms/{roomNumber}', RoomShow::class)->name('rooms.show');
 
 
         // ROUTE EXPORT DATA

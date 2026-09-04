@@ -8,6 +8,7 @@ use App\Models\Room;
 use App\Models\RoomScene;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Show extends Component
 {
@@ -30,16 +31,22 @@ class Show extends Component
         ];
     }
 
-    public function mount($id)
+    public function mount($roomNumber)
     {
         $currentTeam = Auth::user()->currentTeam;
         $this->room = Room::where('team_id', $currentTeam->id)
             ->with(['property', 'scenes'])
-            ->findOrFail($id);
+            ->where(function ($query) use ($roomNumber) {
+                $query->where('room_number', $roomNumber);
+
+                if (Str::isUuid($roomNumber)) {
+                    $query->orWhere('id', $roomNumber);
+                }
+            })
+            ->firstOrFail();
 
         if ($this->room->scenes->isEmpty() && $this->room->panorama_360_url) {
             RoomScene::create([
-                'room_id' => $this->room->id,
                 'title' => 'Scene Utama',
                 'image_url' => $this->room->panorama_360_url,
                 'is_default' => true,
@@ -48,7 +55,11 @@ class Show extends Component
         }
 
         $defaultScene = $this->room->scenes->where('is_default', true)->first() ?? $this->room->scenes->first();
-        $this->activeSceneId = $defaultScene ? $defaultScene->id : null;
+        $requestedScene = request()->query('scene');
+        $selectedScene = $requestedScene
+            ? $this->room->scenes->firstWhere('id', $requestedScene)
+            : null;
+        $this->activeSceneId = ($selectedScene ?? $defaultScene)?->id;
     }
 
     public function selectScene($sceneId)
@@ -59,6 +70,22 @@ class Show extends Component
         }
 
         $this->activeSceneId = $sceneId;
+        return $this->redirect(route('rooms.show', [
+            'current_team' => Auth::user()->currentTeam->slug,
+            'roomNumber' => $this->room->room_number,
+            'scene' => $scene->id,
+        ]), navigate: false);
+    }
+
+    private function viewerTourData(): array
+    {
+        return $this->room->scenes->mapWithKeys(function (RoomScene $scene) {
+
+            return [(string) $scene->id => [
+                'title' => $scene->title,
+                'imageUrl' => $scene->image_url,
+            ]];
+        })->all();
     }
 
     public function openSceneModal()
@@ -98,16 +125,24 @@ class Show extends Component
         $this->activeSceneId = $scene->id;
         $this->room->load('scenes');
 
+        $this->redirect(route('rooms.show', [
+            'current_team' => Auth::user()->currentTeam->slug,
+            'roomNumber' => $this->room->room_number,
+            'scene' => $scene->id,
+        ]), navigate: false);
+
         session()->flash('message', 'Ruangan 360° berhasil diunggah.');
     }
 
 
     public function render()
     {
-        $activeScene = $this->room->scenes->firstWhere('id', $this->activeSceneId);
+        $activeScene = RoomScene::find($this->activeSceneId);
+        $tourData = $this->viewerTourData();
 
         return view('livewire.rooms.show', [
             'activeScene' => $activeScene,
+            'tourData' => $tourData,
         ])->layout('layouts.app');
     }
 }
