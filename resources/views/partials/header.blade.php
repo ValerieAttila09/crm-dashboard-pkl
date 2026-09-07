@@ -34,15 +34,13 @@
     }
 @endphp
 
-<flux:header class="border-b border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 px-6 py-3 flex items-center justify-between">
-    <!-- Toggle Sidebar Mobile -->
-    <div class="flex items-center gap-4">
+<flux:header class="border-b border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
+    <!-- Left Section: Sidebar Toggle & Breadcrumbs -->
+    <div class="flex items-center gap-2 sm:gap-4 shrink-0">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
-        <livewire:global-search class="lg:hidden"/>
-
-        <div class="flex min-w-0 flex-col gap-1">
-            <nav aria-label="Breadcrumb" class="hidden items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400 sm:flex">
+        <div class="hidden md:flex min-w-0 flex-col gap-1">
+            <nav aria-label="Breadcrumb" class="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
                 @foreach ($breadcrumbs as $breadcrumb)
                     @if (! $loop->last)
                         <a href="{{ $breadcrumb['url'] ?? '#' }}" class="truncate transition hover:text-zinc-700 dark:hover:text-zinc-200">
@@ -59,26 +57,31 @@
         </div>
     </div>
 
-    <!-- Right Side Tools: Notifications & Profile -->
-    <div class="flex items-center gap-4">
+    <!-- Center Section: Global Search Component -->
+    <div class="flex-1 max-w-md mx-2">
+        <livewire:global-search />
+    </div>
+
+    <!-- Right Section: Notifications & Profile -->
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         <!-- Livewire Notification Bell Component -->
         <livewire:notification-bell />
 
-        <div class="h-5 w-px bg-zinc-200 dark:bg-zinc-700"></div>
+        <div class="h-4 sm:h-5 w-px bg-zinc-200 dark:bg-zinc-700"></div>
 
         <!-- User Profile Dropdown -->
         <flux:dropdown position="top" align="end">
-            <button class="flex items-center gap-3 focus:outline-none">
+            <button class="flex items-center gap-2 sm:gap-3 focus:outline-none">
                 <flux:avatar
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
-                    class="size-8"
+                    class="size-7 sm:size-8"
                 />
-                <div class="hidden md:grid text-start text-xs leading-tight">
+                <div class="hidden lg:grid text-start text-xs leading-tight">
                     <span class="font-semibold text-zinc-800 dark:text-zinc-100 truncate">{{ auth()->user()->name }}</span>
                     <span class="text-zinc-500 dark:text-zinc-400 truncate">{{ auth()->user()->currentTeam->name ?? 'No Team' }}</span>
                 </div>
-                <flux:icon icon="chevron-down" class="size-4 text-zinc-400" />
+                <flux:icon icon="chevron-down" class="size-3.5 sm:size-4 text-zinc-400" />
             </button>
 
             <flux:menu class="w-48">
