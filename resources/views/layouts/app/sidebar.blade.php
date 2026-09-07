@@ -21,40 +21,6 @@
                         wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                     
-                    {{-- <flux:sidebar.item 
-                        icon="users" 
-                        :href="route('customers.index', ['current_team' => auth()->user()->currentTeam->slug])" 
-                        :current="request()->routeIs('customers.index')" 
-                        wire:navigate>
-                        {{ __('Customers') }}
-                    </flux:sidebar.item>
-
-                    <flux:sidebar.item 
-                        icon="currency-dollar" 
-                        :href="route('deals.index', ['current_team' => auth()->user()->currentTeam->slug])" 
-                        :current="request()->routeIs('deals.index')" 
-                        wire:navigate>
-                        {{ __('Deals') }}
-                    </flux:sidebar.item>
-
-                    <flux:sidebar.item 
-                        icon="clock" 
-                        :href="route('interactions.index', ['current_team' => auth()->user()->currentTeam->slug])" 
-                        :current="request()->routeIs('interactions.index')" 
-                        wire:navigate>
-                        {{ __('Activities') }}
-                    </flux:sidebar.item>
-
-                    <flux:sidebar.item 
-                        icon="check-circle" 
-                        :href="route('tasks.index', ['current_team' => auth()->user()->currentTeam->slug])" 
-                        :current="request()->routeIs('tasks.index')" 
-                        wire:navigate>
-                        {{ __('Tasks') }}
-                    </flux:sidebar.item> --}}
-
-               
 
                     <flux:sidebar.item 
                         icon="home-modern" 
