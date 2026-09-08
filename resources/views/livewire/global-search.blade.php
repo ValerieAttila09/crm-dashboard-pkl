@@ -49,7 +49,7 @@ new class extends Component
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 overflow-y-auto p-2 sm:p-4 md:p-10 bg-gray-900/60 backdrop-blur-sm flex justify-center items-start pt-10 sm:pt-16"
+         class="fixed inset-0 z-99 overflow-y-auto p-2 sm:p-4 md:p-10 bg-white/50 flex justify-center items-start pt-10 sm:pt-16"
          style="display: none;">
 
         <div @click.away="open = false; $wire.closeModal()" 

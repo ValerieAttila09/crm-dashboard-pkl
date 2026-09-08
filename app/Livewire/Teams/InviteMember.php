@@ -3,10 +3,9 @@
 namespace App\Livewire\Teams;
 
 use Livewire\Component;
-use App\Models\User;
-use App\Models\Team;
-use Illuminate\Support\Facades\DB;
+use App\Models\TeamInvitation;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class InviteMember extends Component
 {
@@ -42,35 +41,38 @@ class InviteMember extends Component
             return;
         }
 
-        // 1. Cek apakah user dengan email tersebut sudah terdaftar di aplikasi
-        $user = User::where('email', $this->email)->first();
-
-        if (!$user) {
-            session()->flash('error', 'Pengguna dengan email ini belum terdaftar di aplikasi.');
-            return;
-        }
-
-        // 2. Cek apakah user sudah menjadi anggota tim ini
-        $alreadyMember = DB::table('team_members')
-            ->where('team_id', $currentTeam->id)
-            ->where('user_id', $user->id)
-            ->exists();
-
+        // 1. Cek apakah pengguna sudah menjadi anggota tim
+        $alreadyMember = $currentTeam->members()->where('email', $this->email)->exists();
         if ($alreadyMember) {
-            session()->flash('error', 'Pengguna ini sudah menjadi anggota tim.');
+            session()->flash('error', 'Pengguna dengan email ini sudah menjadi anggota tim.');
             return;
         }
 
-        // 3. Tambahkan user ke pivot table team_members
-        DB::table('team_members')->insert([
+        // 2. Cek apakah sudah ada undangan aktif (pending) untuk email ini
+        $existingInvitation = TeamInvitation::where('team_id', $currentTeam->id)
+            ->where('email', $this->email)
+            ->whereNull('accepted_at')
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if ($existingInvitation) {
+            session()->flash('error', 'Undangan untuk email ini sudah dikirimkan dan masih berlaku.');
+            return;
+        }
+
+        // 3. Simpan Undangan Baru ke Tabel team_invitations
+        $invitation = TeamInvitation::create([
             'team_id' => $currentTeam->id,
-            'user_id' => $user->id,
+            'email' => $this->email,
             'role' => $this->role,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'invited_by' => Auth::id(),
+            'code' => Str::random(64),
+            'expires_at' => now()->addDays(7), // Berlaku 7 hari
         ]);
 
-        session()->flash('message', "Berhasil menambahkan {$user->name} ke dalam tim sebagai " . ucfirst($this->role) . "!");
+        session()->flash('message', "Undangan berhasil dikirim ke {$this->email}! Kode Konfirmasi: {$invitation->code}");
+        
+        $this->dispatch('invitationSent');
         $this->closeModal();
     }
 

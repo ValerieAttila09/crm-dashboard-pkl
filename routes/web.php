@@ -15,6 +15,7 @@ use App\Livewire\Leases\Index as LeaseIndex;
 use App\Livewire\Maintenance\Index as MaintenanceIndex;
 use App\Livewire\Rooms\Show as RoomShow;
 use App\Livewire\Rooms\NavigationEditor;
+use App\Livewire\Teams\AcceptInvitation;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -34,7 +35,7 @@ Route::prefix('{current_team}')
         Route::get('maintenance', MaintenanceIndex::class)->name('maintenance.index');
         Route::get('rooms/{roomNumber}', RoomShow::class)->name('rooms.show');
         Route::get('rooms/{roomNumber}/navigation/{scene}', NavigationEditor::class)->name('rooms.navigation.edit');
-
+        Route::get('/team-invitations/{code}', AcceptInvitation::class)->name('team-invitations.accept');
 
         // ROUTE EXPORT DATA
         Route::get('export/customers', [ExportController::class, 'exportCustomers'])->name('export.customers');

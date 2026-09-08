@@ -5,11 +5,14 @@ namespace App\Livewire\Teams;
 use Livewire\Component;
 use App\Models\Team;
 use App\Models\User;
+use App\Models\TeamInvitation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class Settings extends Component
 {
+    protected $listeners = ['invitationSent' => '$refresh'];
+
     public function updateRole($userId, $newRole)
     {
         if (!Auth::user()->isTeamAdmin()) {
@@ -19,7 +22,6 @@ class Settings extends Component
 
         $currentTeam = Auth::user()->currentTeam;
 
-        // Cegah mengubah role owner utama tim
         if ($currentTeam->user_id === $userId || $currentTeam->owner_id === $userId) {
             session()->flash('error', 'Role pemilik tim (Owner) tidak dapat diubah.');
             return;
@@ -45,7 +47,6 @@ class Settings extends Component
 
         $currentTeam = Auth::user()->currentTeam;
 
-        // Cegah mengeluarkan owner utama tim
         if ($currentTeam->user_id === $userId || $currentTeam->owner_id === $userId) {
             session()->flash('error', 'Pemilik tim (Owner) tidak dapat dikeluarkan dari tim.');
             return;
@@ -59,20 +60,42 @@ class Settings extends Component
         session()->flash('message', 'Anggota berhasil dikeluarkan dari tim.');
     }
 
+    public function revokeInvitation($invitationId)
+    {
+        if (!Auth::user()->isTeamAdmin()) {
+            session()->flash('error', 'Hanya Admin yang dapat membatalkan undangan.');
+            return;
+        }
+
+        $currentTeam = Auth::user()->currentTeam;
+        TeamInvitation::where('team_id', $currentTeam->id)
+            ->where('id', $invitationId)
+            ->delete();
+
+        session()->flash('message', 'Undangan berhasil dibatalkan.');
+    }
+
     public function render()
     {
         $currentTeam = Auth::user()->currentTeam;
 
-        // Ambil daftar anggota tim dari tabel pivot team_members
         $members = DB::table('team_members')
             ->join('users', 'team_members.user_id', '=', 'users.id')
             ->where('team_members.team_id', $currentTeam->id)
             ->select('users.id', 'users.name', 'users.email', 'team_members.role', 'team_members.created_at as joined_at')
             ->get();
 
+        // Ambil daftar undangan aktif (belum diterima dan belum kedaluwarsa)
+        $pendingInvitations = TeamInvitation::where('team_id', $currentTeam->id)
+            ->whereNull('accepted_at')
+            ->where('expires_at', '>', now())
+            ->latest()
+            ->get();
+
         return view('livewire.teams.settings', [
             'team' => $currentTeam,
             'members' => $members,
+            'pendingInvitations' => $pendingInvitations,
         ])->layout('layouts.app');
     }
 }

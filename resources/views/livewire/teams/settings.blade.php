@@ -95,4 +95,55 @@ new class extends Component
             </table>
         </div>
     </div>
+
+    <!-- Tabel Undangan Pending -->
+    @if(auth()->user()->isTeamAdmin() && $pendingInvitations->count() > 0)
+        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden space-y-4">
+            <div class="p-6 border-b border-gray-100 dark:border-zinc-800">
+                <h3 class="font-bold text-base text-gray-800 dark:text-white">Undangan Pending ({{ $pendingInvitations->count() }})</h3>
+                <p class="text-xs text-gray-400">Daftar pengguna yang diundang tetapi belum mengonfirmasi keanggotaan.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/50 text-[11px] uppercase tracking-wider text-gray-400">
+                            <th class="px-6 py-3">Email Pengguna</th>
+                            <th class="px-6 py-3">Peran (Role)</th>
+                            <th class="px-6 py-3">Berlaku Sampai</th>
+                            <th class="px-6 py-3">Link Undangan</th>
+                            <th class="px-6 py-3 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-zinc-800 text-xs">
+                        @foreach($pendingInvitations as $invitation)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition">
+                                <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                                    {{ $invitation->email }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                                        {{ $invitation->role->value ?? $invitation->role }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-400">
+                                    {{ \Carbon\Carbon::parse($invitation->expires_at)->format('d M Y H:i') }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <a href="{{ route('team-invitations.accept', ['code' => $invitation->code]) }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 underline text-[11px] font-mono">
+                                        Buka Link Undangan
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button wire:click="revokeInvitation({{ $invitation->id }})" wire:confirm="Batalkan undangan untuk {{ $invitation->email }}?" class="text-red-600 hover:text-red-900 font-medium">
+                                        Batalkan
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 </div>
