@@ -192,4 +192,17 @@ class Index extends Component
             'properties' => $properties,
         ])->layout('layouts.app');
     }
+
+    public function delete($id)
+    {
+        if (!Auth::user()->isTeamAdmin()) {
+            session()->flash('error', 'Hanya Admin yang diizinkan untuk menghapus data kamar.');
+            return;
+        }
+
+        $currentTeam = Auth::user()->currentTeam;
+        Room::where('team_id', $currentTeam->id)->where('id', $id)->delete();
+
+        session()->flash('message', 'Kamar berhasil dihapus.');
+    }
 }

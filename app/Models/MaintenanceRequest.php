@@ -16,21 +16,21 @@ class MaintenanceRequest extends Model
         'customer_id',
         'title',
         'description',
+        'issue_image_url',
+        'completion_image_url',
         'priority',
         'status',
         'cost',
     ];
 
-    protected $casts = [
-        'cost' => 'decimal:2',
-    ];
-
+    // Relasi ke Kamar
     public function room()
     {
         return $this->belongsTo(Room::class);
     }
 
-    public function tenant()
+    // Relasi ke Pelapor / Customer (Penyewa)
+    public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');
     }

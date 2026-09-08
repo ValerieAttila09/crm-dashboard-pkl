@@ -68,33 +68,24 @@ class User extends Authenticatable implements PasskeyUser
             : $initials;
     }
 
-    /**
-     * Cek apakah user memiliki role admin/owner di tim aktif.
-     */
     public function isTeamAdmin(): bool
     {
-        if (!$this->currentTeam) {
+        $currentTeam = $this->currentTeam;
+        if (!$currentTeam) {
             return false;
         }
 
-        // 1. Jika user adalah pembuat/pemilik tim (owner)
-        if (isset($this->currentTeam->user_id) && $this->currentTeam->user_id === $this->id) {
-            return true;
-        }
-        
-        if (isset($this->currentTeam->owner_id) && $this->currentTeam->owner_id === $this->id) {
+        // Pemilik tim selalu dianggap Admin
+        if ($currentTeam->user_id === $this->id || $currentTeam->owner_id === $this->id) {
             return true;
         }
 
-        // 2. Cek relasi anggota tim jika ada
-        if (method_exists($this->currentTeam, 'members')) {
-            $membership = $this->currentTeam->members()->where('user_id', $this->id)->first();
-            if ($membership && in_array($membership->pivot->role ?? null, ['admin', 'owner'])) {
-                return true;
-            }
-        }
+        // Cek role di tabel pivot team_members
+        $member = \Illuminate\Support\Facades\DB::table('team_members')
+            ->where('team_id', $currentTeam->id)
+            ->where('user_id', $this->id)
+            ->first();
 
-        // Default: Izinkan jika owner_id/user_id cocok dengan user aktif
-        return true; 
-    }
+        return $member && in_array($member->role, ['admin', 'owner']);
+    }   
 }
