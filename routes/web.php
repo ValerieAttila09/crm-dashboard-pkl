@@ -16,8 +16,13 @@ use App\Livewire\Maintenance\Index as MaintenanceIndex;
 use App\Livewire\Rooms\Show as RoomShow;
 use App\Livewire\Rooms\NavigationEditor;
 use App\Livewire\Teams\AcceptInvitation;
+use App\Livewire\Public\Home as PublicHome;
+use App\Livewire\Public\About as PublicAbout;
+use App\Livewire\Public\Properties as PublicProperties;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', PublicHome::class)->name('home');
+Route::get('/about', PublicAbout::class)->name('about');
+Route::get('/properties', PublicProperties::class)->name('properties');
 
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])
