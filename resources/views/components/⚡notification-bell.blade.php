@@ -27,8 +27,8 @@ new class extends Component
         <div class="p-3 border-b border-gray-100 dark:border-zinc-700 flex items-center justify-between">
             <h3 class="text-xs font-bold text-gray-800 dark:text-gray-100">Notifikasi Tim</h3>
             @if($unreadCount > 0)
-                <button wire:click="markAllAsRead" class="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
-                    Tandai Semua Dibaca
+                <button wire:click="markAllAsRead" wire:loading.attr="disabled" wire:target="markAllAsRead" class="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline disabled:opacity-50">
+                    <span wire:loading.remove wire:target="markAllAsRead">Tandai Semua Dibaca</span><span wire:loading wire:target="markAllAsRead">Memproses...</span>
                 </button>
             @endif
         </div>
@@ -41,8 +41,8 @@ new class extends Component
                         <span class="text-[10px] text-gray-400 mt-1 block">{{ $notification->created_at->diffForHumans() }}</span>
                     </div>
                     @if(!$notification->read_at)
-                        <button wire:click="markAsRead('{{ $notification->id }}')" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
-                            Dibaca
+                        <button wire:click="markAsRead('{{ $notification->id }}')" wire:loading.attr="disabled" wire:target="markAsRead('{{ $notification->id }}')" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline disabled:opacity-50">
+                            <span wire:loading.remove wire:target="markAsRead('{{ $notification->id }}')">Dibaca</span><span wire:loading wire:target="markAsRead('{{ $notification->id }}')">Memproses...</span>
                         </button>
                     @endif
                 </div>

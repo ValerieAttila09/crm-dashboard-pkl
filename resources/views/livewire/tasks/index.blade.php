@@ -39,7 +39,10 @@
                     </select>
                 </div>
 
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white font-medium text-xs rounded-lg hover:bg-indigo-700 transition">Simpan Tugas</button>
+                <button type="submit" wire:loading.attr="disabled" wire:target="store" class="w-full py-2.5 bg-indigo-600 text-white font-medium text-xs rounded-lg hover:bg-indigo-700 transition disabled:opacity-50">
+                    <span wire:loading.remove wire:target="store">Simpan Tugas</span>
+                    <span wire:loading wire:target="store">Menyimpan...</span>
+                </button>
             </form>
         </div>
 
@@ -58,7 +61,7 @@
                 @forelse($tasks as $t)
                     <div class="py-3 flex items-center justify-between gap-3">
                         <div class="flex items-center space-x-3">
-                            <input type="checkbox" wire:click="toggleStatus('{{ $t->id }}')" {{ $t->is_completed ? 'checked' : '' }} class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <input type="checkbox" wire:click="toggleStatus('{{ $t->id }}')" wire:loading.attr="disabled" wire:target="toggleStatus('{{ $t->id }}')" {{ $t->is_completed ? 'checked' : '' }} class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
                             <div>
                                 <p class="text-xs font-semibold {{ $t->is_completed ? 'line-through text-gray-400' : 'text-gray-800 dark:text-white' }}">{{ $t->title }}</p>
                                 @if($t->deal)
@@ -73,7 +76,7 @@
                                     {{ $t->due_date->format('d M Y') }}
                                 </span>
                             @endif
-                            <button wire:click="delete('{{ $t->id }}')" wire:confirm="Hapus tugas ini?" class="text-gray-400 hover:text-red-600 text-xs">&times;</button>
+                            <button wire:click="delete('{{ $t->id }}')" wire:confirm="Hapus tugas ini?" wire:loading.attr="disabled" wire:target="delete('{{ $t->id }}')" class="text-gray-400 hover:text-red-600 text-xs disabled:opacity-50"><span wire:loading.remove wire:target="delete('{{ $t->id }}')">&times;</span><span wire:loading wire:target="delete('{{ $t->id }}')">...</span></button>
                         </div>
                     </div>
                 @empty

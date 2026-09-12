@@ -57,7 +57,7 @@ new class extends Component
 
                 <div class="flex justify-end space-x-2 pt-4 border-t dark:border-zinc-700">
                     <button type="button" wire:click="closeModal" class="px-4 py-2 border rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-700">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition">Tambahkan ke Tim</button>
+                    <button type="submit" wire:loading.attr="disabled" wire:target="invite" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition disabled:opacity-50"><span wire:loading.remove wire:target="invite">Tambahkan ke Tim</span><span wire:loading wire:target="invite">Mengundang...</span></button>
                 </div>
             </form>
         </div>

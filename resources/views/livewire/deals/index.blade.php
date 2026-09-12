@@ -85,10 +85,10 @@
                                 <div class="flex justify-between items-start">
                                     <h4 class="font-semibold text-gray-900 dark:text-white text-sm leading-snug">{{ $deal->title }}</h4>
                                     <div class="flex items-center space-x-2 text-xs">
-                                        <button wire:click="edit('{{ $deal->id }}')" class="text-gray-400 hover:text-indigo-600">Edit</button>
+                                        <button wire:click="edit('{{ $deal->id }}')" wire:loading.attr="disabled" wire:target="edit('{{ $deal->id }}')" class="text-gray-400 hover:text-indigo-600 disabled:opacity-50"><span wire:loading.remove wire:target="edit('{{ $deal->id }}')">Edit</span><span wire:loading wire:target="edit('{{ $deal->id }}')">Memuat...</span></button>
                                         
                                         @if(auth()->user()->isTeamAdmin())
-                                            <button wire:click="delete('{{ $deal->id }}')" wire:confirm="Hapus deal ini?" class="text-gray-400 hover:text-red-600">&times;</button>
+                                            <button wire:click="delete('{{ $deal->id }}')" wire:confirm="Hapus deal ini?" wire:loading.attr="disabled" wire:target="delete('{{ $deal->id }}')" class="text-gray-400 hover:text-red-600 disabled:opacity-50"><span wire:loading.remove wire:target="delete('{{ $deal->id }}')">&times;</span><span wire:loading wire:target="delete('{{ $deal->id }}')">...</span></button>
                                         @endif
                                     </div>
                                 </div>
@@ -108,7 +108,7 @@
 
                                 <!-- Dropdown Pemindah Cepat -->
                                 <div class="pt-1">
-                                    <select wire:change="updateStage('{{ $deal->id }}', $event.target.value)" class="w-full text-[11px] border border-gray-200 dark:border-zinc-700 rounded bg-gray-50 dark:bg-zinc-900 text-gray-600 dark:text-gray-300 p-1 focus:outline-none">
+                                    <select wire:change="updateStage('{{ $deal->id }}', $event.target.value)" wire:loading.attr="disabled" wire:target="updateStage" class="w-full text-[11px] border border-gray-200 dark:border-zinc-700 rounded bg-gray-50 dark:bg-zinc-900 text-gray-600 dark:text-gray-300 p-1 focus:outline-none">
                                         @foreach($stages as $s)
                                             <option value="{{ $s }}" {{ $deal->stage === $s ? 'selected' : '' }}>
                                                 Stage: {{ ucfirst($s) }}
@@ -176,7 +176,7 @@
 
                 <div class="flex justify-end space-x-2 pt-4">
                     <button type="button" wire:click="closeModal()" class="px-4 py-2 border rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-700">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700">Simpan Deal</button>
+                    <button type="submit" wire:loading.attr="disabled" wire:target="store" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 disabled:opacity-50"><span wire:loading.remove wire:target="store">Simpan Deal</span><span wire:loading wire:target="store">Menyimpan...</span></button>
                 </div>
             </form>
         </div>

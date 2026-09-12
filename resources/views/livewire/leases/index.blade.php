@@ -76,12 +76,12 @@ new class extends Component
                                         PAID
                                     </span>
                                 @elseif($lease->payment_status === 'unpaid')
-                                    <button wire:click="togglePaymentStatus('{{ $lease->id }}', 'paid')" 
+                                    <button wire:click="togglePaymentStatus('{{ $lease->id }}', 'paid')" wire:loading.attr="disabled" wire:target="togglePaymentStatus('{{ $lease->id }}', 'paid')"
                                             class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 hover:bg-emerald-100 hover:text-emerald-800 transition title='Klik untuk tandai Lunas'">
                                         UNPAID ➔
                                     </button>
                                 @else
-                                    <button wire:click="togglePaymentStatus('{{ $lease->id }}', 'paid')" 
+                                    <button wire:click="togglePaymentStatus('{{ $lease->id }}', 'paid')" wire:loading.attr="disabled" wire:target="togglePaymentStatus('{{ $lease->id }}', 'paid')"
                                             class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 hover:bg-emerald-100 hover:text-emerald-800 transition title='Klik untuk tandai Lunas'">
                                         OVERDUE ➔
                                     </button>
@@ -102,7 +102,7 @@ new class extends Component
 
                                 <!-- Tombol Akhiri Kontrak -->
                                 @if($lease->status === 'active')
-                                    <button wire:click="terminateLease('{{ $lease->id }}')" 
+                                    <button wire:click="terminateLease('{{ $lease->id }}')" wire:loading.attr="disabled" wire:target="terminateLease('{{ $lease->id }}')"
                                             wire:confirm="Apakah Anda yakin ingin mengakhiri kontrak sewa ini? Status kamar akan otomatis kembali Available."
                                             class="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition font-medium" title="Akhiri Masa Sewa">
                                         Akhiri
@@ -149,7 +149,7 @@ new class extends Component
                                 <input type="text" wire:model="new_tenant_name" class="w-full rounded-lg border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 text-xs" placeholder="Nama Lengkap Tenant">
                                 <input type="email" wire:model="new_tenant_email" class="w-full rounded-lg border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 text-xs" placeholder="Alamat Email">
                                 <input type="text" wire:model="new_tenant_phone" class="w-full rounded-lg border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 text-xs" placeholder="Nomor WhatsApp">
-                                <button type="button" wire:click="storeTenant" class="w-full py-1.5 bg-indigo-600 text-white rounded-lg font-semibold text-xs">Simpan Tenant</button>
+                                <button type="button" wire:click="storeTenant" wire:loading.attr="disabled" wire:target="storeTenant" class="w-full py-1.5 bg-indigo-600 text-white rounded-lg font-semibold text-xs disabled:opacity-50"><span wire:loading.remove wire:target="storeTenant">Simpan Tenant</span><span wire:loading wire:target="storeTenant">Menyimpan...</span></button>
                             </div>
                         @else
                             <select wire:model="customer_id" class="w-full rounded-lg border-gray-300 dark:border-zinc-700 dark:bg-zinc-800">
@@ -212,8 +212,9 @@ new class extends Component
                         <button type="button" wire:click="closeModal" class="px-4 py-2 bg-gray-100 dark:bg-zinc-800 rounded-lg text-gray-600 dark:text-gray-300 font-semibold">
                             Batal
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold">
-                            Simpan Kontrak
+                        <button type="submit" wire:loading.attr="disabled" wire:target="store" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold disabled:opacity-50">
+                            <span wire:loading.remove wire:target="store">Simpan Kontrak</span>
+                            <span wire:loading wire:target="store">Menyimpan...</span>
                         </button>
                     </div>
                 </form>

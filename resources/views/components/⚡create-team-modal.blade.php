@@ -41,8 +41,9 @@ new class extends Component {
                 <flux:button variant="filled">{{ __('Cancel') }}</flux:button>
             </flux:modal.close>
 
-            <flux:button variant="primary" type="submit" data-test="switcher-create-team-submit">
-                {{ __('Create team') }}
+            <flux:button variant="primary" type="submit" wire:loading.attr="disabled" wire:target="createTeam" data-test="switcher-create-team-submit">
+                <span wire:loading.remove wire:target="createTeam">{{ __('Create team') }}</span>
+                <span wire:loading wire:target="createTeam">{{ __('Creating...') }}</span>
             </flux:button>
         </div>
     </form>

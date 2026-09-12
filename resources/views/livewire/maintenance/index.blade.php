@@ -1,4 +1,4 @@
-<div class="p-6 bg-slate-50 dark:bg-zinc-900 min-h-screen">
+<div class="p-6 bg-white dark:bg-zinc-900 min-h-screen">
 
     <!-- Flash Message -->
     @if (session()->has('message'))
@@ -91,7 +91,7 @@
                         </td>
                         <!-- Quick Status Toggle -->
                         <td class="p-3">
-                            <select wire:change="updateQuickStatus('{{ $req->id }}', $event.target.value)" 
+                            <select wire:change="updateQuickStatus('{{ $req->id }}', $event.target.value)" wire:loading.attr="disabled" wire:target="updateQuickStatus"
                                     class="text-[11px] font-extrabold rounded-lg border-0 py-1 px-2.5 shadow-sm cursor-pointer
                                     {{ $req->status === 'completed' ? 'bg-emerald-100 text-emerald-800' : '' }}
                                     {{ $req->status === 'in_progress' ? 'bg-blue-100 text-blue-800' : '' }}
@@ -204,8 +204,9 @@
                         <button type="button" wire:click="$set('isModalOpen', false)" class="px-4 py-2 bg-gray-100 dark:bg-zinc-800 rounded-lg text-gray-600 dark:text-gray-300 font-semibold">
                             Batal
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold">
-                            Simpan Laporan
+                        <button type="submit" wire:loading.attr="disabled" wire:target="store" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold disabled:opacity-50">
+                            <span wire:loading.remove wire:target="store">Simpan Laporan</span>
+                            <span wire:loading wire:target="store">Menyimpan...</span>
                         </button>
                     </div>
                 </form>

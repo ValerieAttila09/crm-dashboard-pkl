@@ -51,7 +51,7 @@
                     @endforeach
                 </select>
                 @error('targetSceneId') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
-                <div class="flex justify-end gap-2"><button type="button" wire:click="$set('isHotspotModalOpen', false)" class="rounded bg-zinc-200 px-4 py-2 text-sm">Batal</button><button class="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Simpan</button></div>
+                <div class="flex justify-end gap-2"><button type="button" wire:click="$set('isHotspotModalOpen', false)" class="rounded bg-zinc-200 px-4 py-2 text-sm">Batal</button><button type="submit" wire:loading.attr="disabled" wire:target="storeHotspot" class="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"><span wire:loading.remove wire:target="storeHotspot">Simpan</span><span wire:loading wire:target="storeHotspot">Menyimpan...</span></button></div>
             </form>
         </div>
     @endif

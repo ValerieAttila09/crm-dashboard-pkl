@@ -198,8 +198,8 @@
                                 <div>
                                     <input type="text" wire:model="new_property_address" placeholder="Alamat Singkat (Opsional)" class="w-full p-2 border rounded text-xs dark:bg-zinc-900 dark:border-zinc-700 dark:text-white">
                                 </div>
-                                <button type="button" wire:click="storeProperty" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded text-[11px]">
-                                    Simpan & Gunakan Properti
+                                <button type="button" wire:click="storeProperty" wire:loading.attr="disabled" wire:target="storeProperty" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded text-[11px] disabled:opacity-50">
+                                    <span wire:loading.remove wire:target="storeProperty">Simpan & Gunakan Properti</span><span wire:loading wire:target="storeProperty">Menyimpan...</span>
                                 </button>
                             </div>
                         @else
@@ -268,7 +268,7 @@
 
                 <div class="flex justify-end gap-2 mt-6">
                     <button wire:click="closeModal" class="px-4 py-2 bg-gray-200 text-xs font-semibold rounded">Batal</button>
-                    <button wire:click="store" class="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded">Simpan</button>
+                    <button wire:click="store" wire:loading.attr="disabled" wire:target="store" class="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded disabled:opacity-50"><span wire:loading.remove wire:target="store">Simpan</span><span wire:loading wire:target="store">Menyimpan...</span></button>
                 </div>
             </div>
         </div>

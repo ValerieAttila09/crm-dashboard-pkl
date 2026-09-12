@@ -19,10 +19,12 @@ use App\Livewire\Teams\AcceptInvitation;
 use App\Livewire\Public\Home as PublicHome;
 use App\Livewire\Public\About as PublicAbout;
 use App\Livewire\Public\Properties as PublicProperties;
+use App\Livewire\Public\Contact as PublicContact;
 
 Route::get('/', PublicHome::class)->name('home');
 Route::get('/about', PublicAbout::class)->name('about');
 Route::get('/properties', PublicProperties::class)->name('properties');
+Route::get('/contact', PublicContact::class)->name('contact');
 
 Route::prefix('{current_team}')
     ->middleware(['auth', 'verified', EnsureTeamMembership::class])

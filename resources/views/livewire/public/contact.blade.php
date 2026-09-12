@@ -119,8 +119,9 @@ new class extends Component
                     @error('message') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition">
-                    Kirim Pesan via WhatsApp 💬
+                <button type="submit" wire:loading.attr="disabled" wire:target="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition disabled:opacity-50">
+                    <span wire:loading.remove wire:target="submit">Kirim Pesan via WhatsApp 💬</span>
+                    <span wire:loading wire:target="submit">Menyiapkan pesan...</span>
                 </button>
             </form>
         </div>

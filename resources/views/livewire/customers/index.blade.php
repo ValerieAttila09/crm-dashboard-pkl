@@ -65,10 +65,10 @@ new class extends Component
                         </td>
                         <td class="px-6 py-4 text-right space-x-2">
                             <a href="{{ route('customers.show', ['current_team' => auth()->user()->currentTeam->slug, 'id' => $customer->id]) }}" wire:navigate class="text-blue-600 hover:text-blue-900">Lihat</a>
-                            <button wire:click="edit('{{ $customer->id }}')" class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                                <button wire:click="edit('{{ $customer->id }}')" wire:loading.attr="disabled" wire:target="edit('{{ $customer->id }}')" class="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"><span wire:loading.remove wire:target="edit('{{ $customer->id }}')">Edit</span><span wire:loading wire:target="edit('{{ $customer->id }}')">Memuat...</span></button>
                             
                             @if(auth()->user()->isTeamAdmin())
-                                <button wire:click="delete('{{ $customer->id }}')" wire:confirm="Yakin ingin menghapus data ini?" class="text-red-600 hover:text-red-900">Hapus</button>
+                                <button wire:click="delete('{{ $customer->id }}')" wire:confirm="Yakin ingin menghapus data ini?" wire:loading.attr="disabled" wire:target="delete('{{ $customer->id }}')" class="text-red-600 hover:text-red-900 disabled:opacity-50"><span wire:loading.remove wire:target="delete('{{ $customer->id }}')">Hapus</span><span wire:loading wire:target="delete('{{ $customer->id }}')">Menghapus...</span></button>
                             @endif
                         </td>
                     </tr>
@@ -121,7 +121,7 @@ new class extends Component
 
                 <div class="flex justify-end space-x-2 pt-4">
                     <button type="button" wire:click="closeModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm">Simpan</button>
+                    <button type="submit" wire:loading.attr="disabled" wire:target="store" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm disabled:opacity-50"><span wire:loading.remove wire:target="store">Simpan</span><span wire:loading wire:target="store">Menyimpan...</span></button>
                 </div>
             </form>
         </div>

@@ -48,7 +48,7 @@ new class extends Component
                             <span class="text-[9px] bg-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded font-bold">Default</span>
                         @endif
                         <a href="{{ route('rooms.navigation.edit', ['current_team' => auth()->user()->currentTeam->slug, 'roomNumber' => $room->room_number, 'scene' => $scene->id]) }}" class="text-[10px] text-indigo-600 hover:underline">Edit navigasi</a>
-                        <button type="button" wire:click="deleteScene('{{ $scene->id }}')" wire:confirm="Hapus scene {{ $scene->title }}? Hotspot yang terkait juga akan terhapus." class="text-[10px] text-rose-600 hover:underline" @disabled($room->scenes->count() <= 1)>Hapus</button>
+                        <button type="button" wire:click="deleteScene('{{ $scene->id }}')" wire:confirm="Hapus scene {{ $scene->title }}? Hotspot yang terkait juga akan terhapus." wire:loading.attr="disabled" wire:target="deleteScene('{{ $scene->id }}')" class="text-[10px] text-rose-600 hover:underline disabled:opacity-50" @disabled($room->scenes->count() <= 1)><span wire:loading.remove wire:target="deleteScene('{{ $scene->id }}')">Hapus</span><span wire:loading wire:target="deleteScene('{{ $scene->id }}')">Menghapus...</span></button>
                     </div>
                 @empty
                     <p class="text-xs text-gray-400 italic">Belum ada foto 360°. Silakan tambah foto ruangan pertama.</p>
@@ -60,7 +60,6 @@ new class extends Component
         <div class="lg:col-span-3 bg-zinc-900 rounded-xl overflow-hidden shadow-lg border border-zinc-700 relative h-125">
             @if($activeScene)
                 <div wire:ignore id="room-panorama-viewer" class="w-full h-full"></div>
-
             @else
                 <div class="flex items-center justify-center h-full text-zinc-500 text-sm">
                     Pilih atau tambahkan scene 360° terlebih dahulu.
@@ -92,7 +91,7 @@ new class extends Component
 
                 <div class="flex justify-end gap-2 pt-2">
                     <button wire:click="$set('isSceneModalOpen', false)" class="px-4 py-2 bg-gray-200 rounded font-semibold">Batal</button>
-                    <button wire:click="storeScene" class="px-4 py-2 bg-indigo-600 text-white rounded font-semibold">Unggah ke Supabase</button>
+                    <button wire:click="storeScene" wire:loading.attr="disabled" wire:target="storeScene" class="px-4 py-2 bg-indigo-600 text-white rounded font-semibold disabled:opacity-50"><span wire:loading.remove wire:target="storeScene">Unggah ke Supabase</span><span wire:loading wire:target="storeScene">Mengunggah...</span></button>
                 </div>
             </div>
         </div>

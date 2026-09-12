@@ -38,8 +38,9 @@ new class extends Component
             </div>
         </div>
         <div class="flex justify-end">
-            <button type="submit" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition">
-                + Simpan Aktivitas
+            <button type="submit" wire:loading.attr="disabled" wire:target="store" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition disabled:opacity-50">
+                <span wire:loading.remove wire:target="store">+ Simpan Aktivitas</span>
+                <span wire:loading wire:target="store">Menyimpan...</span>
             </button>
         </div>
     </form>
@@ -59,8 +60,8 @@ new class extends Component
                     <p class="text-gray-800 dark:text-gray-200 font-medium">{{ $item->notes }}</p>
                     <span class="text-[10px] text-gray-400">{{ $item->created_at->diffForHumans() }}</span>
                 </div>
-                <button wire:click="delete('{{ $item->id }}')" wire:confirm="Hapus catatan ini?" class="text-gray-400 hover:text-red-600">
-                    &times;
+                <button wire:click="delete('{{ $item->id }}')" wire:confirm="Hapus catatan ini?" wire:loading.attr="disabled" wire:target="delete('{{ $item->id }}')" class="text-gray-400 hover:text-red-600 disabled:opacity-50">
+                    <span wire:loading.remove wire:target="delete('{{ $item->id }}')">&times;</span><span wire:loading wire:target="delete('{{ $item->id }}')">...</span>
                 </button>
             </div>
         @empty

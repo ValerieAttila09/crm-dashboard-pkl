@@ -8,164 +8,181 @@ new class extends Component
 };
 ?>
 
-<div>
-<div class="bg-slate-50 dark:bg-zinc-950 min-h-screen text-zinc-800 dark:text-zinc-100 font-sans">
+<div class="bg-white text-zinc-900 font-sans antialiased selection:bg-orange-500 selection:text-white">
 
-    <!-- 1. NAVBAR PUBLIK -->
-    <nav class="sticky top-0 z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200/80 dark:border-zinc-800 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-500/20">
-                P
+    <!-- 1. FLOATING GLASS NAVBAR -->
+    <header class="fixed top-4 inset-x-0 z-50 max-w-7xl mx-auto px-4">
+        <nav class="bg-zinc-900/90 backdrop-blur-md text-white rounded-full px-6 py-3.5 flex items-center justify-between border border-white/10 shadow-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center font-black text-sm text-white">
+                    P
+                </div>
+                <span class="font-extrabold tracking-tight text-sm">PropertyLiving</span>
             </div>
-            <span class="font-bold text-lg text-zinc-900 dark:text-white tracking-tight">PropertyLiving</span>
-        </div>
 
-        <div class="hidden md:flex items-center gap-8 text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-            <a href="#hero" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Beranda</a>
-            <a href="#features" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Keunggulan 360°</a>
-            <a href="#units" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Katalog Unit</a>
-            <a href="#about" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Tentang Kami</a>
-        </div>
-
-        <div class="flex items-center gap-3">
-            <a href="{{ route('login') }}" class="px-4 py-2 text-xs font-bold text-zinc-700 dark:text-zinc-200 hover:text-indigo-600 transition">
-                Masuk Admin
-            </a>
-            <a href="#units" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-500/20 transition">
-                Cari Unit 360°
-            </a>
-        </div>
-    </nav>
-
-    <!-- 2. HERO SECTION -->
-    <section id="hero" class="relative pt-12 pb-20 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        <!-- Left Content -->
-        <div class="lg:col-span-7 space-y-6">
-            <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-bold">
-                ✨ Pengalaman Baru Jelajah Hunian
-            </span>
-
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-zinc-900 dark:text-white leading-[1.15] tracking-tight">
-                Rasakan Sensasi Tur <span class="text-indigo-600 dark:text-indigo-400">Virtual 360°</span> Sebelum Sewa Unit
-            </h1>
-
-            <p class="text-zinc-500 dark:text-zinc-400 text-sm sm:text-base max-w-xl leading-relaxed">
-                Jelajahi setiap sudut kamar, cek fasilitas lengkap, dan pastikan kenyamanan tempat tinggal masa depanmu secara mendalam langsung dari HP tanpa perlu survei lokasi fisik.
-            </p>
-
-            <!-- Search Quick Bar -->
-            <div class="p-2 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-none border border-zinc-200/80 dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-12 gap-2">
-                <div class="sm:col-span-6 px-3 py-2">
-                    <label class="block text-[10px] uppercase font-bold text-zinc-400">Lokasi / Gedung</label>
-                    <input type="text" wire:model.live.debounce.300ms="searchLocation" placeholder="Ketik nama gedung atau kota..." class="w-full bg-transparent border-0 p-0 text-xs font-semibold text-zinc-800 dark:text-white focus:ring-0 placeholder-zinc-400">
-                </div>
-                <div class="sm:col-span-3 px-3 py-2 border-t sm:border-t-0 sm:border-l border-zinc-100 dark:border-zinc-800">
-                    <label class="block text-[10px] uppercase font-bold text-zinc-400">Tipe Unit</label>
-                    <select wire:model.live="selectedType" class="w-full bg-transparent border-0 p-0 text-xs font-semibold text-zinc-800 dark:text-white focus:ring-0 cursor-pointer">
-                        <option value="">Semua Tipe</option>
-                        <option value="Studio">Studio</option>
-                        <option value="1 BR">1 BR</option>
-                        <option value="2 BR">2 BR</option>
-                    </select>
-                </div>
-                <div class="sm:col-span-3">
-                    <a href="#units" class="w-full h-full min-h-[44px] bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/20 transition">
-                        Cari Sekarang
-                    </a>
-                </div>
+            <div class="hidden md:flex items-center gap-8 text-xs font-medium text-zinc-300">
+                <a href="#hero" class="hover:text-orange-400 transition">Home</a>
+                <a href="#about" class="hover:text-orange-400 transition">About Us</a>
+                <a href="#units" class="hover:text-orange-400 transition">Living Spaces</a>
+                <a href="#insights" class="hover:text-orange-400 transition">Virtual 360°</a>
             </div>
+
+            <div class="flex items-center gap-3">
+                <a href="{{ route('login') }}" class="px-4 py-2 text-xs font-semibold hover:text-orange-400 transition">Login</a>
+                <a href="#contact" class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-full transition shadow-lg shadow-orange-500/30">
+                    Contact Us
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 2. FULL-BLEED HERO BANNER -->
+    <section id="hero" class="relative min-h-[85vh] flex items-end pb-16 px-6 pt-32">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=80" 
+                 class="w-full h-full object-cover brightness-[0.45]" alt="Hero Living Space">
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-black/30"></div>
         </div>
 
-        <!-- Right Interactive Card Preview -->
-        <div class="lg:col-span-5 relative">
-            <div class="relative bg-zinc-900 rounded-3xl overflow-hidden shadow-2xl border border-zinc-800 group">
-                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80" class="w-full h-[380px] object-cover opacity-80 group-hover:scale-105 transition duration-500" alt="360 Preview">
-                <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-black/30"></div>
-                
-                <!-- Badge 360 Interactive Tag -->
-                <div class="absolute top-4 left-4 px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs font-bold rounded-full flex items-center gap-2">
-                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></span>
-                    Tur Virtual 360° Interactive
-                </div>
-
-                <div class="absolute bottom-6 left-6 right-6">
-                    <p class="text-xs text-indigo-400 font-bold uppercase tracking-wider">Unit Rekomendasi</p>
-                    <h3 class="text-xl font-bold text-white mt-1">Kamar Executive Studio A101</h3>
-                    <p class="text-xs text-zinc-300 mt-1">Gedung Residence Park • Rp 2.500.000 / bln</p>
-                </div>
+        <div class="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+            <div class="lg:col-span-8 space-y-4">
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-none">
+                    We provide fully <br/><span class="text-zinc-300 font-light italic">immersive living.</span>
+                </h1>
+            </div>
+            <div class="lg:col-span-4 space-y-4">
+                <p class="text-zinc-300 text-xs sm:text-sm leading-relaxed">
+                    Eksplorasi hunian modern dan fasilitas apartemen secara mendalam melalui teknologi Virtual Tour 360° sebelum menentukan pilihan sewa Anda.
+                </p>
+                <a href="#units" class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-full shadow-xl transition">
+                    Explore Spaces &rarr;
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- 3. FEATURED UNITS LISTING -->
-    <section id="units" class="py-16 px-6 max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-            <div>
-                <h2 class="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">Unit Kamar Siap Huni</h2>
-                <p class="text-xs sm:text-sm text-zinc-500 mt-1">Jelajahi unit dengan dukungan foto panorama 360° interaktif.</p>
-            </div>
+    <!-- 3. INTRO SECTION & IMAGE GALLERY -->
+    <section id="about" class="py-24 px-6 max-w-7xl mx-auto text-center">
+        <span class="px-3 py-1 bg-orange-100 text-orange-600 text-[10px] font-bold uppercase tracking-widest rounded-full">
+            Modern Living Experience
+        </span>
+
+        <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 mt-4 max-w-3xl mx-auto leading-tight">
+            Integrated Living & Space Management Solutions
+        </h2>
+
+        <p class="text-zinc-500 text-xs sm:text-sm max-w-2xl mx-auto mt-4 leading-relaxed">
+            Menghadirkan standar baru pengelolaan properti tempat tinggal dengan transparansi tagihan sewa, respon cepat perbaikan, dan kebebasan inspeksi unit berbasis digital.
+        </p>
+
+        <div class="mt-8">
+            <a href="{{ route('about') }}" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-full transition inline-block">
+                Read More &rarr;
+            </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @forelse($featuredRooms as $room)
-                <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between">
-                    <div>
-                        <!-- Thumbnail / Panorama Preview -->
-                        <div class="relative h-48 bg-zinc-800 overflow-hidden">
+        <!-- 4-Column Image Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+            <div class="h-64 rounded-2xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover hover:scale-105 transition duration-500" alt="Space 1">
+            </div>
+            <div class="h-64 rounded-2xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover hover:scale-105 transition duration-500" alt="Space 2">
+            </div>
+            <div class="h-64 rounded-2xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover hover:scale-105 transition duration-500" alt="Space 3">
+            </div>
+            <div class="h-64 rounded-2xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover hover:scale-105 transition duration-500" alt="Space 4">
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. DARK CONTRAST FEATURE CONTAINER (Seperti referensi hitam di tengah) -->
+    <section class="py-16 px-4 max-w-7xl mx-auto">
+        <div class="bg-zinc-900 rounded-3xl p-8 sm:p-16 text-white text-center space-y-12">
+            <div class="max-w-2xl mx-auto space-y-4">
+                <span class="px-3 py-1 bg-orange-500/20 text-orange-400 text-[10px] font-bold uppercase tracking-widest rounded-full">
+                    Our Commitment
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold leading-snug">
+                    We create long-term relationships with every tenant by managing spaces completely.
+                </h2>
+                <a href="{{ route('properties') }}" class="inline-block px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-full transition">
+                    View Catalog
+                </a>
+            </div>
+
+            <!-- Dynamic Room Showcase Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+                @forelse($featuredRooms as $room)
+                    <div class="bg-zinc-800/80 rounded-2xl p-3 border border-zinc-700/60 hover:border-orange-500/50 transition">
+                        <div class="h-40 rounded-xl overflow-hidden relative">
                             <img src="{{ $room->panorama_360_url ?? 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80' }}" class="w-full h-full object-cover" alt="Kamar {{ $room->room_number }}">
-                            <span class="absolute top-3 right-3 px-2.5 py-1 bg-emerald-500 text-white font-extrabold text-[10px] uppercase rounded-md shadow">
-                                AVAILABLE
+                            <span class="absolute top-2 right-2 px-2 py-0.5 bg-orange-500 text-white font-black text-[9px] uppercase rounded">
+                                360° TOUR
                             </span>
-                            @if($room->scenes->count() > 0)
-                                <span class="absolute bottom-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-md text-white font-bold text-[10px] rounded-md flex items-center gap-1">
-                                    🌐 {{ $room->scenes->count() }} Scene 360°
-                                </span>
-                            @endif
                         </div>
-
-                        <!-- Card Info -->
-                        <div class="p-5">
-                            <span class="text-[10px] font-bold uppercase text-indigo-600 dark:text-indigo-400 tracking-wider">{{ $room->type }}</span>
-                            <h3 class="text-base font-bold text-zinc-900 dark:text-white mt-0.5">Kamar {{ $room->room_number }}</h3>
-                            <p class="text-xs text-zinc-500 truncate mt-1">🏢 {{ $room->property->name ?? 'Properti N/A' }}</p>
-                            
-                            <div class="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-                                <div>
-                                    <p class="text-[10px] text-zinc-400 font-semibold">Harga Sewa</p>
-                                    <p class="text-sm font-black text-zinc-900 dark:text-white">Rp {{ number_format($room->price_per_month, 0, ',', '.') }}<span class="text-[10px] font-normal text-zinc-400">/bln</span></p>
-                                </div>
-                            </div>
+                        <div class="mt-3 px-1">
+                            <h3 class="text-sm font-bold text-white">Kamar {{ $room->room_number }}</h3>
+                            <p class="text-xs text-zinc-400 mt-0.5">Rp {{ number_format($room->price_per_month, 0, ',', '.') }} / bln</p>
                         </div>
                     </div>
-
-                    <!-- Card Actions -->
-                    <div class="p-5 pt-0 flex gap-2">
-                        <a href="{{ route('rooms.show', ['current_team' => $room->property->team->slug ?? 'default', 'roomNumber' => $room->room_number]) }}" 
-                           class="flex-1 py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 text-center font-bold text-xs rounded-xl transition">
-                            🌐 Tur 360°
-                        </a>
-                        <a href="https://wa.me/6281234567890?text={{ urlencode('Halo, saya tertarik untuk menyewa Kamar ' . $room->room_number . ' di ' . ($room->property->name ?? '')) }}" target="_blank"
-                           class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-500/20 transition flex items-center justify-center">
-                            💬 Tanya
-                        </a>
+                @empty
+                    <div class="col-span-full text-center text-zinc-500 text-xs py-6">
+                        Belum ada kamar unggulan yang ditampilkan.
                     </div>
-                </div>
-            @empty
-                <div class="col-span-full py-12 text-center text-zinc-400 text-xs">
-                    Belum ada unit kamar publik yang tersedia saat ini.
-                </div>
-            @endforelse
+                @endforelse
+            </div>
         </div>
     </section>
 
-    <!-- 4. FOOTER -->
-    <footer class="bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-10 px-6">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
-            <p>© 2026 PropertyLiving Platform. All rights reserved.</p>
-            <div class="flex gap-6">
-                <a href="#" class="hover:text-zinc-800 dark:hover:text-white">Kebijakan Privasi</a>
-                <a href="#" class="hover:text-zinc-800 dark:hover:text-white">Syarat & Ketentuan</a>
-                <a href="#" class="hover:text-zinc-800 dark:hover:text-white">Kontak Admin</a>
+    <!-- 5. CALL TO ACTION BANNER (ORANGE CARD) -->
+    <section class="py-16 px-6 max-w-7xl mx-auto">
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-3xl p-10 sm:p-14 text-center text-white space-y-6 shadow-2xl shadow-orange-500/20">
+            <h2 class="text-3xl sm:text-5xl font-black tracking-tight">Let's Discuss Your Next Space</h2>
+            <p class="text-xs sm:text-sm text-orange-100 max-w-lg mx-auto">
+                Apakah Anda mencari unit tempat tinggal baru atau ingin mendaftarkan gedung Anda ke dalam manajemen kami?
+            </p>
+            <div class="pt-2 flex justify-center gap-3">
+                <a href="{{ route('contact') }}" class="px-6 py-3 bg-white text-orange-600 font-bold text-xs rounded-full hover:bg-zinc-100 transition shadow">
+                    Contact Us
+                </a>
+                <a href="https://wa.me/6281234567890" target="_blank" class="px-6 py-3 bg-zinc-900 text-white font-bold text-xs rounded-full hover:bg-black transition shadow">
+                    WhatsApp Direct
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. FOOTER -->
+    <footer class="bg-white border-t border-zinc-200 py-12 px-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-xs text-zinc-500">
+            <div class="space-y-3">
+                <div class="flex items-center gap-2 text-zinc-900 font-bold">
+                    <div class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs">P</div>
+                    <span>PropertyLiving</span>
+                </div>
+                <p class="text-[11px] leading-relaxed">Platform manajemen hunian modern berbasis analisis IoT dan tur virtual 360° interaktif.</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-zinc-900 mb-3 uppercase text-[10px] tracking-wider">Company</h4>
+                <ul class="space-y-2">
+                    <li><a href="{{ route('about') }}" class="hover:text-zinc-900">About Us</a></li>
+                    <li><a href="{{ route('properties') }}" class="hover:text-zinc-900">Living Catalog</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-zinc-900 mb-3 uppercase text-[10px] tracking-wider">Services</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-zinc-900">Virtual Tour 360°</a></li>
+                    <li><a href="#" class="hover:text-zinc-900">Lease Management</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-zinc-900 mb-3 uppercase text-[10px] tracking-wider">Contact</h4>
+                <p>Jakarta, Indonesia</p>
+                <p class="mt-1 font-semibold text-zinc-800">+62 812-3456-7890</p>
             </div>
         </div>
     </footer>

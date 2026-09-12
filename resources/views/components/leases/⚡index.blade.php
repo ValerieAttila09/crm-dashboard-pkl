@@ -134,7 +134,7 @@ new class extends Component
 
                 <div class="flex justify-end gap-2 mt-6">
                     <button wire:click="closeModal" class="px-4 py-2 bg-gray-200 text-xs font-semibold rounded">Batal</button>
-                    <button wire:click="store" class="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded">Simpan Kontrak</button>
+                    <button wire:click="store" wire:loading.attr="disabled" wire:target="store" class="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded disabled:opacity-50"><span wire:loading.remove wire:target="store">Simpan Kontrak</span><span wire:loading wire:target="store">Menyimpan...</span></button>
                 </div>
             </div>
         </div>

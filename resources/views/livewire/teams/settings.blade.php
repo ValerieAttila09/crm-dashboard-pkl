@@ -70,7 +70,7 @@ new class extends Component
                             <td class="px-6 py-4">
                                 @if(auth()->user()->isTeamAdmin() && $team->user_id !== $member->id && $team->owner_id !== $member->id)
                                     <!-- Select Ubah Role (Hanya Admin) -->
-                                    <select wire:change="updateRole({{ $member->id }}, $event.target.value)" class="text-xs border dark:border-zinc-700 rounded-lg p-1.5 dark:bg-zinc-800 dark:text-white focus:outline-none">
+                                    <select wire:change="updateRole({{ $member->id }}, $event.target.value)" wire:loading.attr="disabled" wire:target="updateRole" class="text-xs border dark:border-zinc-700 rounded-lg p-1.5 dark:bg-zinc-800 dark:text-white focus:outline-none">
                                         <option value="member" {{ $member->role === 'member' ? 'selected' : '' }}>Member / Sales</option>
                                         <option value="admin" {{ $member->role === 'admin' ? 'selected' : '' }}>Admin</option>
                                     </select>

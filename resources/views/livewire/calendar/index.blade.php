@@ -93,7 +93,7 @@ new class extends Component
                                         {{ $sch->type === 'lease_due' ? 'bg-emerald-50 border-emerald-300 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200' : '' }}">
                                         <div class="flex items-center justify-between">
                                             <span class="font-bold truncate">{{ $sch->title }}</span>
-                                            <button wire:click="updateStatus({{ $sch->id }}, '{{ $sch->status === 'done' ? 'upcoming' : 'done' }}')" 
+                                            <button wire:click="updateStatus({{ $sch->id }}, '{{ $sch->status === 'done' ? 'upcoming' : 'done' }}')" wire:loading.attr="disabled" wire:target="updateStatus({{ $sch->id }}, '{{ $sch->status === 'done' ? 'upcoming' : 'done' }}')"
                                                     class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase {{ $sch->status === 'done' ? 'bg-emerald-200 text-emerald-800' : 'bg-gray-200 text-gray-700' }}">
                                                 {{ $sch->status }}
                                             </button>
@@ -222,8 +222,9 @@ new class extends Component
                         <button type="button" wire:click="closeModal" class="px-4 py-2 bg-gray-100 dark:bg-zinc-800 rounded-lg text-gray-600 dark:text-gray-300 font-semibold">
                             Batal
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold">
-                            Simpan Jadwal
+                        <button type="submit" wire:loading.attr="disabled" wire:target="storeSchedule" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold disabled:opacity-50">
+                            <span wire:loading.remove wire:target="storeSchedule">Simpan Jadwal</span>
+                            <span wire:loading wire:target="storeSchedule">Menyimpan...</span>
                         </button>
                     </div>
                 </form>
