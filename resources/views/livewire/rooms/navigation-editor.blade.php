@@ -45,7 +45,8 @@
                 @error('hotspotLabel') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
                 <textarea wire:model="hotspotDescription" class="w-full rounded border p-2 text-sm" rows="3" placeholder="Description"></textarea>
                 <select wire:model="targetSceneId" class="w-full rounded border p-2 text-sm">
-                    <option value="">Pilih tujuan ruangan</option>
+                    <option value="">Info hotspot (tanpa navigasi)</option>
+                    <option disabled>-- Navigasi ke scene --</option>
                     @foreach($scenes->where('id', '!=', $activeScene->id) as $targetScene)
                         <option value="{{ $targetScene->id }}">{{ $targetScene->title }}</option>
                     @endforeach

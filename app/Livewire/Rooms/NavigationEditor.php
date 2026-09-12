@@ -50,7 +50,8 @@ class NavigationEditor extends Component
             'hotspotLabel' => 'required|string|max:255',
             'hotspotDescription' => 'nullable|string|max:2000',
             'targetSceneId' => [
-                'required',
+                'nullable',
+                'uuid',
                 Rule::exists('room_scenes', 'id')->where(fn ($query) => $query->where('room_id', $this->room->id)),
             ],
         ]);

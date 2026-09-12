@@ -89,14 +89,10 @@ class Show extends Component
                     'id' => (string) $hotspot->id,
                     'pitch' => (float) $hotspot->pitch,
                     'yaw' => (float) $hotspot->yaw,
+                    'title' => $hotspot->title,
                     'label' => $hotspot->label ?: $hotspot->title,
                     'description' => $hotspot->description,
-                    'targetSceneId' => (string) $hotspot->target_scene_id,
-                    'targetUrl' => route('rooms.show', [
-                        'current_team' => Auth::user()->currentTeam->slug,
-                        'roomNumber' => $this->room->room_number,
-                        'scene' => $hotspot->target_scene_id,
-                    ]),
+                    'targetSceneId' => $hotspot->target_scene_id ? (string) $hotspot->target_scene_id : null,
                 ])->values()->all(),
             ]];
         })->all();

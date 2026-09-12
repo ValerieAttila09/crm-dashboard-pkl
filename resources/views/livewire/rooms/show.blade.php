@@ -8,6 +8,11 @@ new class extends Component
 };
 ?>
 
+<style>
+    [x-cloak] { display: none !important; }
+    .hotspots-hidden .pnlm-hotspot { display: none !important; }
+</style>
+
 <div class="p-6 space-y-6">
     <!-- Header & Breadcrumb -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -57,9 +62,32 @@ new class extends Component
         </div>
 
         <!-- 360 Viewer Canvas Area -->
-        <div class="lg:col-span-3 bg-zinc-900 rounded-xl overflow-hidden shadow-lg border border-zinc-700 relative h-125">
+        <div x-data="roomTourControls()" x-init="initialize($refs.viewer)" @room-tour:info.window="openInfo($event.detail)" :class="{ 'hotspots-hidden': hotspotsHidden }" class="lg:col-span-3 bg-zinc-900 rounded-xl overflow-hidden shadow-lg border border-zinc-700 relative h-125">
             @if($activeScene)
-                <div wire:ignore id="room-panorama-viewer" class="w-full h-full"></div>
+                <div wire:ignore x-ref="viewer" id="room-panorama-viewer" class="w-full h-full"></div>
+
+                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 rounded-2xl border border-white/10 bg-zinc-900/80 px-2 py-1.5 text-white shadow-2xl backdrop-blur-md">
+                    <button type="button" @click="toggleAutoRotate" :aria-pressed="autoRotating" :class="autoRotating ? 'bg-indigo-600 text-white' : 'text-zinc-300 hover:bg-white/10'" class="rounded-xl px-3 py-2 text-xs font-semibold transition" title="Putar otomatis">
+                        <span x-text="autoRotating ? 'Jeda' : 'Putar'"></span>
+                    </button>
+                    <button type="button" @click="resetView" class="rounded-xl px-3 py-2 text-xs font-semibold text-zinc-300 transition hover:bg-white/10" title="Reset kamera">Reset</button>
+                    <button type="button" @click="zoomOut" class="rounded-xl px-2.5 py-2 text-sm font-bold text-zinc-300 transition hover:bg-white/10" title="Perkecil">−</button>
+                    <button type="button" @click="zoomIn" class="rounded-xl px-2.5 py-2 text-sm font-bold text-zinc-300 transition hover:bg-white/10" title="Perbesar">+</button>
+                    <button type="button" @click="toggleFullscreen" class="rounded-xl px-3 py-2 text-xs font-semibold text-zinc-300 transition hover:bg-white/10" title="Layar penuh">Layar penuh</button>
+                    <button type="button" @click="toggleHotspots" :aria-pressed="!hotspotsHidden" :class="hotspotsHidden ? 'bg-rose-600 text-white' : 'text-zinc-300 hover:bg-white/10'" class="rounded-xl px-3 py-2 text-xs font-semibold transition" title="Tampilkan/sembunyikan label hotspot">
+                        <span x-text="hotspotsHidden ? 'Hotspot off' : 'Hotspot on'"></span>
+                    </button>
+                </div>
+
+                <div x-cloak x-show="isInfoModalOpen" x-transition.opacity class="absolute inset-0 z-40 flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm" @keydown.escape.window="closeInfo">
+                    <div x-show="isInfoModalOpen" x-transition class="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900/95 p-6 text-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="room-tour-info-title">
+                        <div class="flex items-start justify-between gap-4">
+                            <h2 id="room-tour-info-title" class="text-lg font-bold" x-text="modalTitle"></h2>
+                            <button type="button" @click="closeInfo" class="rounded-lg px-2 py-1 text-zinc-400 transition hover:bg-white/10 hover:text-white" aria-label="Tutup">&times;</button>
+                        </div>
+                        <p class="mt-4 whitespace-pre-line text-sm leading-6 text-zinc-300" x-text="modalDesc"></p>
+                    </div>
+                </div>
             @else
                 <div class="flex items-center justify-center h-full text-zinc-500 text-sm">
                     Pilih atau tambahkan scene 360° terlebih dahulu.
@@ -103,28 +131,112 @@ new class extends Component
         <script>
             (() => {
                 const tourData = @js($tourData);
-                const scenes = Object.fromEntries(Object.entries(tourData).map(([sceneId, scene]) => [sceneId, {
-                    type: 'equirectangular',
-                    panorama: scene.imageUrl,
-                    autoLoad: true,
-                    hotSpots: (scene.hotspots || []).map((hotspot) => ({
-                        pitch: hotspot.pitch,
-                        yaw: hotspot.yaw,
-                        type: 'scene',
-                        text: hotspot.label,
-                        sceneId: hotspot.targetSceneId,
-                        clickHandlerFunc: function() {
-                            window.location.assign(hotspot.targetUrl);
-                        }
-                    }))
-                }]));
-                pannellum.viewer('room-panorama-viewer', {
-                    default: {
-                        firstScene: @js((string) $activeSceneId),
-                        sceneFadeDuration: 500
+                const initialView = { pitch: 0, yaw: 0, hfov: 100 };
+
+                window.roomTourCleanup = window.roomTourCleanup || (() => {});
+                window.roomTourControls = () => ({
+                    viewer: null,
+                    autoRotating: false,
+                    hotspotsHidden: false,
+                    isInfoModalOpen: false,
+                    modalTitle: '',
+                    modalDesc: '',
+                    initialize(element) {
+                        window.roomTourCleanup();
+                        const scenes = Object.fromEntries(Object.entries(tourData).map(([sceneId, scene]) => [sceneId, {
+                            type: 'equirectangular',
+                            panorama: scene.imageUrl,
+                            autoLoad: true,
+                            hotSpots: (scene.hotspots || []).map((hotspot) => {
+                                const pannellumHotspot = {
+                                    id: hotspot.id,
+                                    pitch: hotspot.pitch,
+                                    yaw: hotspot.yaw,
+                                    text: hotspot.label || hotspot.title,
+                                    cssClass: hotspot.targetSceneId ? undefined : 'room-info-hotspot'
+                                };
+
+                                if (hotspot.targetSceneId) {
+                                    pannellumHotspot.type = 'scene';
+                                    pannellumHotspot.sceneId = hotspot.targetSceneId;
+                                } else {
+                                    pannellumHotspot.type = 'info';
+                                    pannellumHotspot.clickHandlerFunc = () => window.dispatchEvent(new CustomEvent('room-tour:info', {
+                                        detail: {
+                                            title: hotspot.title || hotspot.label || 'Informasi',
+                                            description: hotspot.description || hotspot.label || 'Tidak ada deskripsi.'
+                                        }
+                                    }));
+                                }
+
+                                return pannellumHotspot;
+                            })
+                        }]));
+
+                        this.viewer = pannellum.viewer(element, {
+                            default: {
+                                firstScene: @js((string) $activeSceneId),
+                                pitch: initialView.pitch,
+                                yaw: initialView.yaw,
+                                hfov: initialView.hfov,
+                                sceneFadeDuration: 500
+                            },
+                            scenes,
+                            showControls: false
+                        });
+                        window.roomTourViewer = this.viewer;
+                        window.roomTourCleanup = () => {
+                            if (this.viewer) {
+                                this.viewer.destroy();
+                                this.viewer = null;
+                            }
+                            window.roomTourViewer = null;
+                        };
                     },
-                    scenes
+                    toggleAutoRotate() {
+                        if (!this.viewer) return;
+                        this.autoRotating = !this.autoRotating;
+                        this.autoRotating ? this.viewer.startAutoRotate(2) : this.viewer.stopAutoRotate();
+                    },
+                    resetView() {
+                        if (!this.viewer) return;
+                        this.viewer.stopAutoRotate();
+                        this.autoRotating = false;
+                        this.viewer.setPitch(initialView.pitch);
+                        this.viewer.setYaw(initialView.yaw);
+                        this.viewer.setHfov(initialView.hfov);
+                    },
+                    zoomIn() {
+                        if (this.viewer) this.viewer.setHfov(Math.max(30, this.viewer.getHfov() - 10));
+                    },
+                    zoomOut() {
+                        if (this.viewer) this.viewer.setHfov(Math.min(120, this.viewer.getHfov() + 10));
+                    },
+                    toggleFullscreen() {
+                        if (this.viewer?.toggleFullscreen) {
+                            this.viewer.toggleFullscreen();
+                        } else {
+                            const container = this.$root;
+                            document.fullscreenElement ? document.exitFullscreen() : container.requestFullscreen?.();
+                        }
+                    },
+                    toggleHotspots() {
+                        this.hotspotsHidden = !this.hotspotsHidden;
+                    },
+                    openInfo(detail) {
+                        this.modalTitle = detail.title;
+                        this.modalDesc = detail.description;
+                        this.isInfoModalOpen = true;
+                    },
+                    closeInfo() {
+                        this.isInfoModalOpen = false;
+                    }
                 });
+
+                if (!window.roomTourNavigationCleanupRegistered) {
+                    document.addEventListener('livewire:navigating', () => window.roomTourCleanup());
+                    window.roomTourNavigationCleanupRegistered = true;
+                }
             })();
         </script>
     @endif
